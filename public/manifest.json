@@ -1,0 +1,17 @@
+{
+  "short_name": "Chelo",
+  "name": "Chelo Mini DAOs",
+  "description": "App that allows normal daos to create mini DAOs",
+  "iconPath": "multimedia/chelo/logo_black.png",
+  "icons": [
+    {
+      "src": "multimedia/chelo/logo_black.png",
+      "sizes": "any",
+      "type": "image/png"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}

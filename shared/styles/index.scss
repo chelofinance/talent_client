@@ -1,0 +1,32 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+html {
+  scroll-behavior: smooth;
+}
+
+p {
+  word-break: break-word;
+}
+
+.main {
+  @apply relative flex w-full flex-1 px-10 md:px-20 text-center flex-col;
+  @apply bg-gradient-to-r from-one to-three;
+}
+
+.main-content {
+  @apply relative w-full flex justify-center items-center flex-col pt-20 min-h-screen;
+  // @apply max-w-6xl;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+*::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+* {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}

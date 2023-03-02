@@ -1,0 +1,203 @@
+[
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "_name",
+        "type": "string"
+      },
+      {
+        "name": "_symbol",
+        "type": "string"
+      }
+    ],
+    "name": "newToken",
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "_id",
+        "type": "string"
+      },
+      {
+        "name": "_members",
+        "type": "address[]"
+      },
+      {
+        "name": "_votingSettings",
+        "type": "uint64[3]"
+      }
+    ],
+    "name": "newInstance",
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "factory",
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "_id",
+        "type": "string"
+      },
+      {
+        "name": "_members",
+        "type": "address[]"
+      },
+      {
+        "name": "_votingSettings",
+        "type": "uint64[3]"
+      },
+      {
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "name": "firstDeposit",
+        "type": "uint256"
+      }
+    ],
+    "name": "newTokenAndInstance",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "name": "_daoFactory",
+        "type": "address"
+      },
+      {
+        "name": "_ens",
+        "type": "address"
+      },
+      {
+        "name": "_miniMeFactory",
+        "type": "address"
+      },
+      {
+        "name": "_aragonID",
+        "type": "address"
+      },
+      {
+        "name": "_factory",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "dao",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "miniDao",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "miniAgent",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "token",
+        "type": "address"
+      }
+    ],
+    "name": "CreatedMiniDao",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "dao",
+        "type": "address"
+      }
+    ],
+    "name": "DeployDao",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "dao",
+        "type": "address"
+      }
+    ],
+    "name": "SetupDao",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "token",
+        "type": "address"
+      }
+    ],
+    "name": "DeployToken",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "appProxy",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "appId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "InstalledApp",
+    "type": "event"
+  }
+]
