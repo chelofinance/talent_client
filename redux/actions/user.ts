@@ -1,14 +1,13 @@
 import {createAsyncThunk, createAction} from "@reduxjs/toolkit";
 
 import * as actionTypes from "@redux/constants";
-import {getERC20Balances, getERC721Balances} from "@helpers/chelo/services/apis";
-import {switchNetwork, addNetwork} from "@helpers/index";
-import {ConnectionType} from "@helpers/connection";
+import {getERC20Balances, getERC721Balances} from "@helpers/erc/utils";
+import {addNetwork, switchNetwork} from "@helpers/index";
+import {ConnectionType, network} from "@helpers/connection";
 import {Connector} from "@web3-react/types";
 import {getConnection} from "@helpers/connection/utils";
 import {TransactionMeta} from "types";
-
-type StateErrorType = {message: string; code: string; open: boolean};
+import {getNetworkConfig} from "@helpers/network";
 
 export const onConnectWallet = createAsyncThunk<
   {
@@ -83,7 +82,24 @@ export const onSwitchNetwork = createAsyncThunk<
 
       return {network: networkId};
     } catch (err) {
-      console.log("onSwitchNetwork", err);
+      const network = getNetworkConfig(networkId);
+      try {
+        if (err.code === 4902) {
+          await addNetwork({
+            chainId: networkId,
+            name: network.settings.name,
+            currency: {
+              name: network.settings.currency,
+              decimals: 18,
+              symbol: network.settings.currency,
+            },
+            rpcUrl: network.settings.explorer,
+          });
+          return {network: networkId};
+        }
+      } catch (err) {
+        console.log({onConnectWallet: err});
+      }
       return rejectWithValue({
         message: err.message,
         code: err.code,

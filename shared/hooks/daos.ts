@@ -1,12 +1,15 @@
+import React from "react";
+
 import {onGetUserDaos} from "@redux/actions/daos";
 import {useAppDispatch, useAppSelector} from "@redux/store";
 
-export const useDaos = () => {
-  const daos = useAppSelector((state) => state.daos);
+export const useDao = () => {
+  const {daos, loaded} = useAppSelector((state) => state.daos);
   const dispatch = useAppDispatch();
 
-  if (daos.daos.length > 0) return daos;
-  else dispatch(onGetUserDaos());
+  React.useEffect(() => {
+    if (!loaded) dispatch(onGetUserDaos());
+  }, [loaded]);
 
-  return daos;
+  return {dao: daos[0], loaded};
 };

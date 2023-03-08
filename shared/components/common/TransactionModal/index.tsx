@@ -1,5 +1,4 @@
 import React from "react";
-import {evmcl} from "@1hive/evmcrispr";
 import {CheckIcon} from "@heroicons/react/solid";
 import {ExclamationCircleIcon} from "@heroicons/react/solid";
 import {ClockIcon} from "@heroicons/react/solid";
@@ -12,14 +11,10 @@ import {getScriptType} from "@helpers/contracts";
 import {useAppDispatch, useAppSelector} from "@redux/store";
 import {useGetMiniDaos} from "@shared/hooks/utils";
 import {useWeb3React} from "@web3-react/core";
-import {getAragonApps, simpleAragonExec} from "@helpers/aragon";
 import {onShowTransaction, onUpdateError} from "@redux/actions";
-import {getConnection} from "@helpers/connection/utils";
-import {ConnectionType} from "@helpers/connection";
-import {GnosisSafe} from "@web3-react/gnosis-safe";
 import {calculateGasMargin} from "@helpers/index";
 import {TransactionRequest} from "@ethersproject/providers";
-import {parseCheloTransaction} from "@helpers/chelo/daos";
+import {parseCheloTransaction} from "@helpers/chelo";
 
 interface TransactionModalProps extends TransactionMeta {
   showModal: boolean;
@@ -109,49 +104,6 @@ export const TransactionModal: React.FunctionComponent<TransactionModalProps> = 
     return newTxs;
   };
 
-  const handleAragonTransaction = async () => {
-    const dao = daos.find(({id}) => daoId === id) || mini_daos.find(({id}) => daoId === id);
-
-    if (!dao || dao?.type === "snapshot")
-      throw new Error(dao ? "not aragon dao" : "not existing dao");
-
-    const txString = txs
-      .map(
-        (tx) =>
-          `act agent ${tx.to} ${tx.signature} ${tx.args
-            .map((arg) => (Array.isArray(arg) ? `[${arg.join(",")}]` : `${arg}`))
-            .join(" ")}`
-      )
-      .join("\n");
-
-    if (chainId === 1) {
-      //evm crisp only works on chainId 1, 4 and 100
-      const evm = evmcl`
-         connect ${daoId} token-manager voting
-         ${txString}
-        `;
-
-      changeTransactionStatus("sent");
-      await evm.forward(provider.getSigner());
-      return;
-    }
-
-    const usedApps = await getAragonApps({kernel: dao.id, provider});
-    const res = await simpleAragonExec({transactions: txs, apps: usedApps, provider});
-    changeTransactionStatus("sent");
-    await res.wait();
-  };
-
-  const handleGnosisTransaction = async () => {
-    if (!(getConnection(connector).type === ConnectionType.GNOSIS_SAFE))
-      throw new Error("useSendGnosisTransaction only when using gnosis provider");
-    const gnosisConnector = connector as GnosisSafe;
-
-    const parsedTxs = txs.map(parseCheloTransaction);
-    changeTransactionStatus("sent");
-    await gnosisConnector.sdk.txs.send({txs: parsedTxs});
-  };
-
   const handleTransaction = async () => {
     const signer = provider.getSigner();
     const txRequest: TransactionRequest[] = txs.map(parseCheloTransaction);
@@ -173,8 +125,6 @@ export const TransactionModal: React.FunctionComponent<TransactionModalProps> = 
 
       changeTransactionStatus("confirmed");
 
-      if (type === "aragon") await handleAragonTransaction();
-      if (type === "snapshot") await handleGnosisTransaction(); //TODO handle syndicate and wallet (with gnosis)
       if (type === "wallet") await handleTransaction();
     } catch (err) {
       console.log("tx error", err);

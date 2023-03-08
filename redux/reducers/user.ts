@@ -30,7 +30,7 @@ const user_state: UserState = {
     account: {
         address: "",
         wallet: ConnectionType.INJECTED,
-        networkId: 1,
+        networkId: null,
     },
     transaction: {
         tx: {

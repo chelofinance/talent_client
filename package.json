@@ -6,10 +6,12 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "codegen": "graphql-codegen -w"
   },
   "dependencies": {
     "@1hive/evmcrispr": "0.4.0",
+    "@apollo/client": "^3.7.9",
     "@coinbase/wallet-sdk": "3.5.0",
     "@emotion/react": "11.8.1",
     "@emotion/styled": "11.8.1",
@@ -41,6 +43,7 @@
     "ethers": "^5.5.4",
     "ethjs-ens": "^2.0.1",
     "formik": "^2.2.9",
+    "graphql-tag": "^2.12.6",
     "keyv": "^4.5.0",
     "next": "^12.1.0",
     "next-redux-wrapper": "^8.0.0",
@@ -54,6 +57,10 @@
     "yup": "^0.32.11"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "^3.2.1",
+    "@graphql-codegen/client-preset": "^2.1.0",
+    "@graphql-codegen/typed-document-node": "^3.0.1",
+    "@graphql-codegen/typescript-resolvers": "^3.1.0",
     "@types/node": "^16.11.7",
     "@types/react": "^17.0.34",
     "@types/react-redux": "^7.1.24",

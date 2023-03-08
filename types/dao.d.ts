@@ -1,4 +1,6 @@
-type SupportedNetworks = 1 | 5 | 137 | 80001;
+type SupportedNetworks = 1 | 5 | 137 | 80001 | 31337;
+
+type StateErrorType = {message: string; code: string; open: boolean};
 
 type VoteSettings = Partial<Setting & {maxPrincipal: string; minPrincipal: string; pool: string}>;
 
@@ -123,8 +125,8 @@ interface AragonDAO extends DAO {
 interface MiniDAO extends DAO {
   token: {address: string};
   votesLength: string;
-  vote_duration: string;
-  support: string;
+  votingDelay: string;
+  votingPeriod: string;
   quorum: string;
 }
 

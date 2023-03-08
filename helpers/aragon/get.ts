@@ -1,12 +1,7 @@
 import axios from "axios";
 
 import {getNetworkConfig} from "@helpers/network";
-import {
-  SYNDICATE_DAOS_GIVEN_MEMBER,
-  SYNDICATE_DAOS_GIVEN_OWNER,
-  UserDaos,
-  USER_DAOS_QUERY,
-} from "./queries";
+import {UserDaos, USER_DAOS_QUERY} from "./gql";
 import {ethers} from "ethers";
 import {decodeWithIfaces} from "@helpers/connection/utils";
 
@@ -114,7 +109,7 @@ const getDaoTokensTxs = async (args: {account: string; networkId: SupportedNetwo
 export const getUserAragonDAOs = async (args: {
   account: string;
   networkId: SupportedNetworks;
-}): Promise<{dao: string; name: string}[]> => {
+}): Promise<AragonDAO[]> => {
   const {networkId, account} = args;
   const {endpoints} = getNetworkConfig(networkId);
 
@@ -152,65 +147,20 @@ export const getUserAragonDAOs = async (args: {
 
       if (!decodedData) return null;
 
-      return {
-        dao: balance.contract.organization.id,
+      const aragon: AragonDAO = {
+        id: balance.contract.organization.id,
         name: decodedData._id,
+        apps: [],
+        address: balance.contract.organization.id,
+        wallet: "",
+        createdAt: 0,
+        type: "aragon",
+        isRoot: true,
       };
+
+      return aragon;
     }).filter(Boolean);
   }
 
   return [];
-};
-
-export const getUserSyndicateDaos = async (args: {
-  account: string;
-  networkId: SupportedNetworks;
-}): Promise<{dao: string; name: string}[]> => {
-  const {networkId, account} = args;
-  const {endpoints} = getNetworkConfig(networkId);
-  let res: {dao: string; name: string}[] = [];
-
-  const byOwnerData = await fetch(endpoints.syndicate, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify({
-      query: SYNDICATE_DAOS_GIVEN_OWNER,
-      variables: {ownerAddress: account.toLowerCase()},
-    }),
-  });
-
-  const byMemberData = await fetch(endpoints.syndicate, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify({
-      query: SYNDICATE_DAOS_GIVEN_MEMBER,
-      variables: {member: account.toLowerCase()},
-    }),
-  });
-
-  if (byOwnerData.ok) {
-    const json = await byOwnerData.json();
-    res = json.data.syndicateDAOs.map((dao) => ({
-      dao: dao.ownerAddress,
-      name: dao.name,
-    }));
-  }
-
-  if (byMemberData.ok) {
-    const json = await byMemberData.json();
-    res = res.concat(
-      json.data.syndicateDAOs.map((dao) => ({
-        dao: dao.ownerAddress,
-        name: dao.name,
-      }))
-    );
-  }
-
-  return res;
 };

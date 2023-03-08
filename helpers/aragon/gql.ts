@@ -4,6 +4,32 @@ import {getNetworkConfig} from "@helpers/network";
 import {getAragonApps} from "./apps";
 import {resolveEnsDomain} from "./ens";
 
+export type UserDaos = {
+  ERC20balances: {
+    contract: {
+      organization: {
+        id: string;
+        txInput: string;
+      };
+    };
+  }[];
+};
+
+export const USER_DAOS_QUERY = `
+  query UserDaos($id: ID!) {
+    accounts(where:{id: $id}){
+      ERC20balances{
+        contract{
+          organization{
+            id
+            txInput
+          }
+        }
+      }
+    }
+  }
+`;
+
 export type Organization = {
   id: string;
   address: string;
@@ -11,7 +37,7 @@ export type Organization = {
   apps: {appId: string; address: string; repoName: string}[];
 };
 
-const getOrgQuery = `query Organizations($id: ID!) {
+const GET_ORG_QUERY = `query Organizations($id: ID!) {
     organizations(where: {id: $id},  orderBy: createdAt, orderDirection: desc){ 
       id
       address
@@ -49,7 +75,7 @@ export const getAragonDAO = async (
       Accept: "application/json",
     },
     body: JSON.stringify({
-      query: getOrgQuery,
+      query: GET_ORG_QUERY,
       variables: {id: orgAddress.toLowerCase()},
     }),
   });

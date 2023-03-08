@@ -5,7 +5,7 @@ import Modal from "@shared/components/common/Modal";
 import {WALLETS} from "@helpers/connection/utils";
 import {Connection} from "@helpers/connection";
 import {networkConfigs} from "@helpers/network";
-import {useAppDispatch} from "@redux/store";
+import {useAppDispatch, useAppSelector} from "@redux/store";
 import {onSwitchNetwork} from "@redux/actions";
 import {useWeb3React} from "@web3-react/core";
 
@@ -15,7 +15,10 @@ interface WalletModalProps {
   onSelect?: Function;
 }
 
-const NETWORKS = Object.entries(networkConfigs);
+const {hardhat, ...productionConfigs} = networkConfigs;
+const NETWORKS = Object.entries(
+  process.env.NEXT_PUBLIC_PRODUCTION === "false" ? networkConfigs : productionConfigs
+);
 
 const ConnectionComponent: React.FunctionComponent<{
   connection: Connection;
@@ -47,8 +50,11 @@ export const WalletModal: React.FunctionComponent<WalletModalProps> = ({
   setShowModal,
 }) => {
   const dispatch = useAppDispatch();
+  const {
+    account: {networkId},
+  } = useAppSelector((state) => state.user);
   const {connector, isActive} = useWeb3React();
-  const [selectedNetwork, setSelectedNetwork] = React.useState<SupportedNetworks>(5);
+  const [selectedNetwork, setSelectedNetwork] = React.useState<SupportedNetworks>(null);
 
   const handleConnect = async () => {
     try {
@@ -60,8 +66,8 @@ export const WalletModal: React.FunctionComponent<WalletModalProps> = ({
   };
 
   React.useEffect(() => {
-    if (isActive) handleConnect();
-  }, [isActive]);
+    if (isActive && !networkId) handleConnect();
+  }, [isActive, networkId]);
 
   return (
     <Modal
@@ -91,7 +97,7 @@ export const WalletModal: React.FunctionComponent<WalletModalProps> = ({
                     <Image src={config.settings.logo} alt="me" width="35" height="35" />
                     <p className="text-sm font-medium">{config.settings.name}</p>
                     {selectedNetwork === config.settings.chainId && (
-                      <div className="w-2/3 bg-orange_custom" style={{height: "2px"}}></div>
+                      <div className="w-2/3 bg-violet-500" style={{height: "2px"}}></div>
                     )}
                   </button>
                 ))}

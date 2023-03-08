@@ -21,7 +21,7 @@ const TEXT_COLORS = {
   dark: "600",
 };
 
-const ROUTE_STYLES = `bg-orange-100 text-orange_custom`;
+const ROUTE_STYLES = `bg-violet-100 text-violet-500`;
 
 const RenderChildren = ({element, key}: {element: DropdownElement; key: number}) => {
   const [open, setOpen] = React.useState(false);
@@ -43,7 +43,7 @@ const RenderChildren = ({element, key}: {element: DropdownElement; key: number})
       <button
         type="button"
         className={clsx(
-          `transition duration-75 group font-semibold  hover:bg-orange-100 text-black rounded-lg`,
+          `transition duration-75 group font-semibold  hover:bg-violet-100 text-black rounded-lg`,
           `flex items-center p-2 w-full`
         )}
         aria-controls="dropdown-example"
@@ -82,7 +82,7 @@ const RenderChildren = ({element, key}: {element: DropdownElement; key: number})
     <div
       onClick={handleRoute}
       className={clsx(
-        `flex items-center p-2 text-base font-semibold  hover:bg-orange-100 text-black rounded-lg`,
+        `flex items-center p-2 text-base font-semibold  hover:bg-violet-100 text-black rounded-lg`,
         router.route === element.url && ROUTE_STYLES
       )}
     >
