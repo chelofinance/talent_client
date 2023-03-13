@@ -1,5 +1,4 @@
 import {graphql} from "__generated__/gql";
-import gql from "graphql-tag";
 
 export const GET_ACCOUNT = graphql(/* GraphQL */ `
   query GetAccount($id: ID!) {

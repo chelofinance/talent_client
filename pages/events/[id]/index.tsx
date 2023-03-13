@@ -1,0 +1,151 @@
+import React from "react";
+import {useRouter} from "next/router";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+
+import Card from "@shared/components/common/Card";
+import AvatarElement from "@shared/components/common/AvatarElement";
+
+const Event = () => {
+  const router = useRouter();
+  const eventId = router.query.id;
+  const isFinished = false;
+
+  return (
+    <>
+      <div className="flex flex-col items-center w-full overflow-scroll pt-20 pb-4 h-full">
+        <div className="w-full mb-20 flex justify-center gap-5">
+          <Card
+            className={`p-4 max-w-5xl bg-neutral-50 text-black rounded-3xl border border-gray-200 shadow-md`}
+            custom
+          >
+            <div className="w-full flex justify-center rounded-2xl mb-5 w-full max-h-96 overflow-hidden">
+              <img
+                src="/multimedia/assets/eth_denver.jpeg"
+                alt="ETH"
+                className="w-full object-none"
+                style={{height: "auto"}}
+              />
+            </div>
+            <div className="mb-4">
+              <span className="text-violet-500 font-bold text-3xl">ETH Denver</span>
+            </div>
+            <div className="flex justify-between mb-10">
+              <div className="flex gap-3 items-center w-1/2">
+                <CalendarMonthIcon fontSize="large" color="primary" />
+                <div className="flex flex-col">
+                  <p className="text-md">Date and time</p>
+                  <p className="text-gray-500 text-md">Date and time</p>
+                </div>
+              </div>
+              <div className="flex gap-3 items-center w-1/2">
+                <LocationOnIcon fontSize="large" color="primary" />
+                <div className="flex flex-col">
+                  <p className="text-md">Location</p>
+                  <p className="text-gray-500 text-md">Location</p>
+                </div>
+              </div>
+            </div>
+            <div className="mb-10">
+              <p>
+                In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to
+                demonstrate the visual form of a document or a typeface without relying on
+                meaningful content. In publishing and graphic design, Lorem ipsum is a placeholder
+                text commonly used to demonstrate the visual form of a document or a typeface
+                without relying on meaningful content
+              </p>
+            </div>
+            {isFinished && (
+              <div>
+                <span className="text-violet-500 font-bold text-xl">Candidate Winner</span>
+                <div className="flex flex-wrap mt-5 px-5">
+                  <div className="flex items-center gap-4">
+                    <div className="rounded-full overflow-hidden" style={{height: 60}}>
+                      <img
+                        width={60}
+                        src="/multimedia/assets/ronald_duck.jpeg"
+                        className="rounded-full"
+                      />
+                    </div>
+
+                    <div className="flex flex-col">
+                      <p className="text-lg font-semibold">Ronald Duck</p>
+                      <p className="text-sm color-gray-500">Ronald Duck</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </Card>
+          {!isFinished && (
+            <div className="w-full">
+              <NewcomersList />
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
+};
+
+const NewcomersList: React.FunctionComponent<{}> = () => {
+  const router = useRouter();
+
+  const newcomers = [
+    {
+      name: "Ronald Duck",
+      role: "Alumni",
+      votes: 30,
+    },
+    {
+      name: "Ronald Duck",
+      role: "Alumni",
+      votes: 27,
+    },
+    {
+      name: "Ronald Duck",
+      role: "Alumni",
+      votes: 26,
+    },
+    {
+      name: "Ronald Duck",
+      role: "Alumni",
+      votes: 26,
+    },
+    {
+      name: "Ronald Duck",
+      role: "Alumni",
+      votes: 10,
+    },
+    {
+      name: "Ronald Duck",
+      role: "Alumni",
+      votes: 2,
+    },
+  ];
+
+  const handleClick = () => {
+    const eventId = "1";
+    router.push(`/events/${eventId}/participants`);
+  };
+
+  return (
+    <Card className="px-12 py-10 pt-0 w-full bg-neutral-50 text-black rounded-3xl border border-gray-200 shadow-md">
+      {newcomers.map(({name, role, votes}) => (
+        <div className={"mt-8 hover:bg-gray-100"} onClick={handleClick}>
+          <AvatarElement
+            badge={true}
+            count={votes}
+            badgeContent={
+              <div className="w-6 h-6 rounded-full bg-violet-500 text-white font-semibold flex items-center justify-center">
+                {votes}
+              </div>
+            }
+          />
+        </div>
+      ))}
+    </Card>
+  );
+};
+
+export default Event;

@@ -30,7 +30,7 @@ export const Button: React.FunctionComponent<ButtonProps> = (props) => {
     <button
       className={clsx(
         props.className ||
-        `bg-orange_custom text-white font-semibold ${props.loading ? "px-6 py-3" : "p-2 px-6"
+        `bg-violet-500 text-white font-semibold ${props.loading ? "px-6 py-3" : "p-2 px-6"
         } rounded-md `,
         classes?.root
       )}
