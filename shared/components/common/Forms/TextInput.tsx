@@ -21,7 +21,7 @@ export const TextInput = React.forwardRef<HTMLInputElement, Props>((props, ref) 
       <div
         className={clsx(
           white
-            ? `border rounded-lg bg-white border-orange p-1 appearance-none border rounded`
+            ? `border-1 border-gray-400 rounded-full bg-white border-orange p-1 appearance-none border overflow-hidden `
             : `border rounded-lg border-orange p-1.5 bg-black`
         )}
       >

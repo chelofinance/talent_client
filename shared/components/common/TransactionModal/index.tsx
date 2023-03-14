@@ -7,7 +7,6 @@ import {PaperAirplaneIcon} from "@heroicons/react/solid";
 import {Button} from "@shared/components/common/Forms";
 import Modal from "@shared/components/common/Modal";
 import {TransactionMeta} from "types";
-import {getScriptType} from "@helpers/contracts";
 import {useAppDispatch, useAppSelector} from "@redux/store";
 import {useGetMiniDaos} from "@shared/hooks/utils";
 import {useWeb3React} from "@web3-react/core";
@@ -15,6 +14,7 @@ import {onShowTransaction, onUpdateError} from "@redux/actions";
 import {calculateGasMargin} from "@helpers/index";
 import {TransactionRequest} from "@ethersproject/providers";
 import {parseCheloTransaction} from "@helpers/chelo";
+import {MiniDaoController} from "@shared/sdk/adapters/mini_dao";
 
 interface TransactionModalProps extends TransactionMeta {
   showModal: boolean;
@@ -119,6 +119,15 @@ export const TransactionModal: React.FunctionComponent<TransactionModalProps> = 
     }
   };
 
+  const handleCheloProposal = async () => {
+    const dao = daos.daos.find((dao) => dao.id === daoId) as MiniDAO;
+    const controller = new MiniDaoController(dao, provider);
+
+    changeTransactionStatus("sent");
+    const tx = await controller.propose(txs);
+    await tx.wait();
+  };
+
   const onSubmitTx = async () => {
     try {
       if (customExecute) return await customExecute({txs, dao: daoId, type});
@@ -126,6 +135,7 @@ export const TransactionModal: React.FunctionComponent<TransactionModalProps> = 
       changeTransactionStatus("confirmed");
 
       if (type === "wallet") await handleTransaction();
+      if (type === "chelo") await handleCheloProposal();
     } catch (err) {
       console.log("tx error", err);
       changeTransactionStatus("waiting");

@@ -102,3 +102,5 @@ export const wait = (seconds: number) =>
 export const getDateDay = (date: number) => {
   return new Date(date).toLocaleString().split(",")[0];
 };
+
+export const hash = (label: string) => ethers.utils.keccak256(ethers.utils.toUtf8Bytes(label));

@@ -1,10 +1,5 @@
 [
   {
-    "inputs": [],
-    "stateMutability": "nonpayable",
-    "type": "constructor"
-  },
-  {
     "anonymous": false,
     "inputs": [
       {
@@ -53,44 +48,38 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
-        "internalType": "contract ILendingPool",
-        "name": "pool",
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
         "type": "address"
       },
       {
-        "indexed": false,
-        "internalType": "contract ILoanManager",
-        "name": "loanManager",
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
         "type": "address"
       }
     ],
-    "name": "LendingPoolCreated",
+    "name": "OwnershipTransferred",
     "type": "event"
   },
   {
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
-        "internalType": "contract ILoanManager",
-        "name": "loanManager",
-        "type": "address"
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "labelHash",
+        "type": "bytes32"
       },
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "address",
-        "name": "owner",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "manager",
+        "name": "implementation",
         "type": "address"
       }
     ],
-    "name": "LoanManagerCreated",
+    "name": "Registered",
     "type": "event"
   },
   {
@@ -174,51 +163,51 @@
       {
         "indexed": true,
         "internalType": "address",
+        "name": "newRegistry",
+        "type": "address"
+      }
+    ],
+    "name": "UpdatedRegistry",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newResolver",
+        "type": "address"
+      }
+    ],
+    "name": "UpdatedResolver",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "newRootNode",
+        "type": "bytes32"
+      }
+    ],
+    "name": "UpdatedRootNode",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
         "name": "implementation",
         "type": "address"
       }
     ],
     "name": "Upgraded",
     "type": "event"
-  },
-  {
-    "inputs": [],
-    "name": "ASSET_WRAPPER",
-    "outputs": [
-      {
-        "internalType": "bytes32",
-        "name": "",
-        "type": "bytes32"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "CHELO",
-    "outputs": [
-      {
-        "internalType": "bytes32",
-        "name": "",
-        "type": "bytes32"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "CHELO_FACTORY",
-    "outputs": [
-      {
-        "internalType": "bytes32",
-        "name": "",
-        "type": "bytes32"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
   },
   {
     "inputs": [],
@@ -235,7 +224,7 @@
   },
   {
     "inputs": [],
-    "name": "FACTORY_MANAGER",
+    "name": "REGISTER_ROLE",
     "outputs": [
       {
         "internalType": "bytes32",
@@ -248,7 +237,7 @@
   },
   {
     "inputs": [],
-    "name": "MANAGER_IMPLEMENTATION",
+    "name": "UPDATER_ROLE",
     "outputs": [
       {
         "internalType": "bytes32",
@@ -261,7 +250,7 @@
   },
   {
     "inputs": [],
-    "name": "POOL_IMPLEMENTATION",
+    "name": "UPGRADE_ROLE",
     "outputs": [
       {
         "internalType": "bytes32",
@@ -274,79 +263,12 @@
   },
   {
     "inputs": [],
-    "name": "SETTINGS",
+    "name": "ens",
     "outputs": [
       {
-        "internalType": "bytes32",
-        "name": "",
-        "type": "bytes32"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "contract ILoanManager",
-        "name": "loanManager",
-        "type": "address"
-      },
-      {
-        "internalType": "contract IERC20Decimals",
-        "name": "token",
-        "type": "address"
-      }
-    ],
-    "name": "createLendingPool",
-    "outputs": [
-      {
-        "internalType": "contract ILendingPool",
+        "internalType": "contract ENS",
         "name": "",
         "type": "address"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "owner",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "manager",
-        "type": "address"
-      }
-    ],
-    "name": "createLoanManager",
-    "outputs": [
-      {
-        "internalType": "contract ILoanManager",
-        "name": "loanManager",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "daoTemplate",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
       }
     ],
     "stateMutability": "view",
@@ -416,9 +338,19 @@
   {
     "inputs": [
       {
-        "internalType": "contract Chelo",
-        "name": "_protocolConfig",
+        "internalType": "contract ENSRegistry",
+        "name": "_ens",
         "type": "address"
+      },
+      {
+        "internalType": "contract PublicResolver",
+        "name": "_resolver",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "_root",
+        "type": "bytes32"
       }
     ],
     "name": "initialize",
@@ -428,10 +360,10 @@
   },
   {
     "inputs": [],
-    "name": "protocolConfig",
+    "name": "owner",
     "outputs": [
       {
-        "internalType": "contract Chelo",
+        "internalType": "address",
         "name": "",
         "type": "address"
       }
@@ -456,6 +388,31 @@
     "inputs": [
       {
         "internalType": "bytes32",
+        "name": "labelHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      }
+    ],
+    "name": "register",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
         "name": "role",
         "type": "bytes32"
       },
@@ -468,6 +425,38 @@
     "name": "renounceRole",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "resolver",
+    "outputs": [
+      {
+        "internalType": "contract PublicResolver",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "labelHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "retrieve",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -489,21 +478,16 @@
     "type": "function"
   },
   {
-    "inputs": [
+    "inputs": [],
+    "name": "rootNode",
+    "outputs": [
       {
-        "internalType": "address[]",
-        "name": "templates",
-        "type": "address[]"
-      },
-      {
-        "internalType": "bool[]",
-        "name": "values",
-        "type": "bool[]"
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
       }
     ],
-    "name": "setTemplates",
-    "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -523,6 +507,58 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "contract ENS",
+        "name": "newEns",
+        "type": "address"
+      }
+    ],
+    "name": "updateRegistry",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "contract PublicResolver",
+        "name": "newResolver",
+        "type": "address"
+      }
+    ],
+    "name": "updateResolver",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "newRootNode",
+        "type": "bytes32"
+      }
+    ],
+    "name": "updateRootNode",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {

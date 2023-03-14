@@ -5,11 +5,16 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 
 import Card from "@shared/components/common/Card";
 import AvatarElement from "@shared/components/common/AvatarElement";
+import {Button} from "@shared/components/common/Forms";
 
 const Event = () => {
   const router = useRouter();
   const eventId = router.query.id;
   const isFinished = false;
+
+  const handleAddList = () => {
+    router.push(`/events/${eventId}/add_participant`);
+  };
 
   return (
     <>
@@ -78,8 +83,14 @@ const Event = () => {
             )}
           </Card>
           {!isFinished && (
-            <div className="w-full">
+            <div className="w-full flex flex-col items-end">
               <NewcomersList />
+              <Button
+                className="w-1/2 p-2 bg-violet-500 text-sm text-white rounded-xl font-semibold mt-8"
+                onClick={handleAddList}
+              >
+                Add Candidate List
+              </Button>
             </div>
           )}
         </div>

@@ -2,6 +2,7 @@ import {makeQuery} from "@helpers/connection";
 import {getNetworkConfig} from "@helpers/network";
 import {ethers} from "ethers";
 import {GovernorsForOwnerQuery} from "__generated__/gql/graphql";
+import {hash, toBN} from "..";
 import {GET_ALL_GIVEN_OWNER} from "./queries";
 
 export const parseCheloTransaction = (
@@ -58,3 +59,20 @@ export const getUserCheloDAOs = async (args: {
     return res;
   });
 };
+
+export function getProposalId(
+  targets: string[],
+  values: string[],
+  fulldata: string[],
+  description: string
+) {
+  const descriptionHash = hash(description);
+  return toBN(
+    ethers.utils.keccak256(
+      ethers.utils.defaultAbiCoder.encode(
+        ["address[]", "uint256[]", "bytes[]", "bytes32"],
+        [targets, values, fulldata, descriptionHash]
+      )
+    )
+  );
+}

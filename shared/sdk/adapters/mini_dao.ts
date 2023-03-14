@@ -1,4 +1,6 @@
 import {JsonRpcProvider, Web3Provider} from "@ethersproject/providers";
+import {attach} from "@helpers/contracts";
+import {ethers} from "ethers";
 
 import {DaoController, DaoType} from "./index";
 
@@ -40,14 +42,6 @@ export class MiniDaoController implements DaoController {
     return this;
   }
 
-  public async propose(txs: CheloTransactionRequest[]) {
-    return "tx" as any;
-  }
-
-  public async vote(proposalId: string, support: boolean) {
-    return "tx" as any;
-  }
-
   public async members() {
     return [];
   }
@@ -55,4 +49,61 @@ export class MiniDaoController implements DaoController {
   public async getProposal(proposalId: string) {
     return "getProposal";
   }
+
+  public vote(proposalId: string, support: boolean, options?: {description?: string}) {
+    const core = attach("Core", this.dao.id, this.connection.provider);
+
+    return options?.description
+      ? core.castVoteWithReason(proposalId, support, options.description)
+      : core.castVote(proposalId, support);
+  }
+
+  public async propose(txs: CheloTransactionRequest[], options?: {description?: string}) {
+    const core = attach("Core", this.dao.id, this.connection.provider);
+    const {targets, values, calldatas} = txs.reduce(
+      (acc, cur) => {
+        const iface = new ethers.utils.Interface([cur.signature]);
+        return {
+          targets: acc.targets.concat([cur.to]),
+          values: acc.values.concat([cur.value]),
+          calldatas: acc.calldatas.concat([iface.encodeFunctionData(cur.signature, cur.args)]),
+        };
+      },
+      {targets: [], values: [], calldatas: []}
+    );
+
+    return core.propose(targets, values, calldatas, options?.description || "");
+  }
+
+  public encodeCall = {
+    vote(proposalId: string, support: boolean, options?: {description?: string}) {
+      const core = attach("Core", this.dao.id, this.connection.provider);
+
+      return options?.description
+        ? core.encodeFunctionData("castVoteWithReason", [proposalId, support, options.description])
+        : core.encodeFunctionData("castVote", [proposalId, support]);
+    },
+
+    propose(txs: CheloTransactionRequest[], options?: {description?: string}) {
+      const core = attach("Core", this.dao.id, this.connection.provider);
+      const {targets, values, calldatas} = txs.reduce(
+        (acc, cur) => {
+          const iface = new ethers.utils.Interface([cur.signature]);
+          return {
+            targets: acc.targets.concat([cur.to]),
+            values: acc.values.concat([cur.value]),
+            calldatas: acc.calldatas.concat([iface.encodeFunctionData(cur.signature, cur.args)]),
+          };
+        },
+        {targets: [], values: [], calldatas: []}
+      );
+
+      return core.encodeFunctionData("propose", [
+        targets,
+        values,
+        calldatas,
+        options?.description || "",
+      ]);
+    },
+  };
 }
