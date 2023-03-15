@@ -122,12 +122,34 @@ interface AragonDAO extends DAO {
   votes?: AragonVote[];
 }
 
+type MiniDaoProposal = {
+  description: string;
+  endBlock: string;
+  id: string;
+  canceled: boolean;
+  executed: boolean;
+  proposalId: string;
+  votesYes: string;
+  votesNo: string;
+  votes?: {}[];
+  metadata?: {
+    title: string;
+    description: string;
+    metadata: {
+      firstName: string;
+      lastName: string;
+      wallet: string;
+    };
+  };
+};
+
 interface MiniDAO extends DAO {
   token: {address: string};
   votesLength: string;
   votingDelay: string;
   votingPeriod: string;
   quorum: string;
+  proposals?: MiniDaoProposal[];
 }
 
 type AragonApp = {

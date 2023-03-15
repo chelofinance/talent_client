@@ -2,12 +2,12 @@ import React from "react";
 import {useRouter} from "next/router";
 
 import Spiner from "@shared/components/common/Spiner";
-import {useDao} from "@shared/hooks/daos";
+import {useDaos} from "@shared/hooks/daos";
 import Card from "@shared/components/common/Card";
 import {Button} from "@shared/components/common/Forms";
 
 const Dashboard = () => {
-  const {dao, loaded} = useDao();
+  const {daos, loaded} = useDaos();
   const router = useRouter();
 
   const onSelectDao = () => {
@@ -18,7 +18,7 @@ const Dashboard = () => {
   return (
     <>
       <div className="flex flex-col items-center w-full overflow-scroll pt-20 pb-4 h-full">
-        {dao ? (
+        {daos.length > 0 ? (
           <div className="w-full mb-20 flex justify-center">
             <Card className="p-4 rounded-2xl max-w-md">
               <div className="w-full flex justify-center mb-5">

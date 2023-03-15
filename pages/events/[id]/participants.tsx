@@ -5,11 +5,46 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Card from "@shared/components/common/Card";
 import {Button} from "@shared/components/common/Forms";
 import AvatarElement from "@shared/components/common/AvatarElement";
+import {useDaos, useProposals} from "@shared/hooks/daos";
+import {useAppDispatch} from "@redux/store";
+import {onShowTransaction} from "@redux/actions";
+import {attach} from "@helpers/contracts";
+import {useWeb3React} from "@web3-react/core";
 
 const Event = () => {
+  const [selected, setSelected] = React.useState(0);
+  const {proposals} = useProposals();
+  const {daos} = useDaos();
+  const {account} = useWeb3React();
+
+  const dispatch = useAppDispatch();
+  const proposal = proposals[selected];
   const router = useRouter();
   const eventId = router.query.id;
   const isFinished = false;
+
+  const handleVoteYes = () => {
+    const dao = daos[0] as MiniDAO;
+
+    dispatch(
+      onShowTransaction({
+        txs: [
+          {
+            to: dao.token.address,
+            signature: "delegate(address)",
+            args: [account],
+          },
+          {
+            to: dao.id,
+            signature: "castVote(uint256,uint8)",
+            args: [proposal.id, 1],
+          },
+        ],
+        type: "wallet",
+        dao: dao.id,
+      })
+    );
+  };
 
   return (
     <>
@@ -30,14 +65,17 @@ const Event = () => {
                 size={80}
                 infoComponent={
                   <div className="flex flex-col">
-                    <p className="text-lg font-semibold whitespace-nowrap">Ronald Duck</p>
+                    <p className="text-lg font-semibold whitespace-nowrap">{`${proposal.metadata.metadata.firstName} ${proposal.metadata.metadata.lastName}`}</p>
                     <p className="text-xs">Identity: Male</p>
                     <p className="text-xs">Ethnicity: Latino</p>
                     <p className="text-xs">Nationality: Canada</p>
                   </div>
                 }
               />
-              <Button className="px-10 py-1 h-10 bg-violet-500 text-white font-bold rounded-full">
+              <Button
+                className="px-10 py-1 h-10 bg-violet-500 text-white font-bold rounded-full"
+                onClick={handleVoteYes}
+              >
                 Vote
               </Button>
             </div>
@@ -89,39 +127,7 @@ const Event = () => {
 
 const NewcomersList: React.FunctionComponent<{}> = () => {
   const router = useRouter();
-
-  const newcomers = [
-    {
-      name: "Ronald Duck",
-      role: "Alumni",
-      votes: 30,
-    },
-    {
-      name: "Ronald Duck",
-      role: "Alumni",
-      votes: 27,
-    },
-    {
-      name: "Ronald Duck",
-      role: "Alumni",
-      votes: 26,
-    },
-    {
-      name: "Ronald Duck",
-      role: "Alumni",
-      votes: 26,
-    },
-    {
-      name: "Ronald Duck",
-      role: "Alumni",
-      votes: 10,
-    },
-    {
-      name: "Ronald Duck",
-      role: "Alumni",
-      votes: 2,
-    },
-  ];
+  const {proposals} = useProposals();
 
   const handleClick = () => {
     const eventId = "1";
@@ -130,14 +136,14 @@ const NewcomersList: React.FunctionComponent<{}> = () => {
 
   return (
     <Card className="px-12 py-10 pt-0 w-full bg-neutral-50 text-black rounded-3xl border border-gray-200 shadow-md">
-      {newcomers.map(({name, role, votes}) => (
+      {proposals.map(({metadata, votesYes}) => (
         <div className={"mt-8 hover:bg-gray-100"} onClick={handleClick}>
           <AvatarElement
             badge={true}
-            count={votes}
+            count={Number(votesYes)}
             badgeContent={
               <div className="w-6 h-6 rounded-full bg-violet-500 text-white font-semibold flex items-center justify-center">
-                {votes}
+                {votesYes}
               </div>
             }
           />

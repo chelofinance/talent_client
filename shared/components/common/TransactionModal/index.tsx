@@ -15,6 +15,7 @@ import {calculateGasMargin} from "@helpers/index";
 import {TransactionRequest} from "@ethersproject/providers";
 import {parseCheloTransaction} from "@helpers/chelo";
 import {MiniDaoController} from "@shared/sdk/adapters/mini_dao";
+import {getScriptType} from "@helpers/contracts";
 
 interface TransactionModalProps extends TransactionMeta {
   showModal: boolean;

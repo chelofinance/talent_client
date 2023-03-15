@@ -6,6 +6,7 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import Card from "@shared/components/common/Card";
 import AvatarElement from "@shared/components/common/AvatarElement";
 import {Button} from "@shared/components/common/Forms";
+import {useProposals} from "@shared/hooks/daos";
 
 const Event = () => {
   const router = useRouter();
@@ -101,39 +102,7 @@ const Event = () => {
 
 const NewcomersList: React.FunctionComponent<{}> = () => {
   const router = useRouter();
-
-  const newcomers = [
-    {
-      name: "Ronald Duck",
-      role: "Alumni",
-      votes: 30,
-    },
-    {
-      name: "Ronald Duck",
-      role: "Alumni",
-      votes: 27,
-    },
-    {
-      name: "Ronald Duck",
-      role: "Alumni",
-      votes: 26,
-    },
-    {
-      name: "Ronald Duck",
-      role: "Alumni",
-      votes: 26,
-    },
-    {
-      name: "Ronald Duck",
-      role: "Alumni",
-      votes: 10,
-    },
-    {
-      name: "Ronald Duck",
-      role: "Alumni",
-      votes: 2,
-    },
-  ];
+  const {proposals} = useProposals();
 
   const handleClick = () => {
     const eventId = "1";
@@ -142,14 +111,20 @@ const NewcomersList: React.FunctionComponent<{}> = () => {
 
   return (
     <Card className="px-12 py-10 pt-0 w-full bg-neutral-50 text-black rounded-3xl border border-gray-200 shadow-md">
-      {newcomers.map(({name, role, votes}) => (
+      {proposals.map(({metadata, votesYes}) => (
         <div className={"mt-8 hover:bg-gray-100"} onClick={handleClick}>
           <AvatarElement
             badge={true}
-            count={votes}
+            count={Number(votesYes)}
+            infoComponent={
+              <div className="flex flex-col">
+                <p className="text-md font-semibold whitespace-nowrap">{`${metadata.metadata.firstName} ${metadata.metadata.lastName}`}</p>
+                <p className="text-xs text-gray-600">{`${metadata.metadata.firstName} ${metadata.metadata.lastName}`}</p>
+              </div>
+            }
             badgeContent={
               <div className="w-6 h-6 rounded-full bg-violet-500 text-white font-semibold flex items-center justify-center">
-                {votes}
+                {votesYes}
               </div>
             }
           />

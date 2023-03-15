@@ -13,3 +13,16 @@ export const useDaos = () => {
 
   return { daos, loaded };
 };
+
+export const useProposals = (daoId?: string) => {
+  const { daos, loaded } = useAppSelector((state) => state.daos);
+  const dispatch = useAppDispatch();
+  const dao = (daoId ? daos.find((d) => d.id === daoId) : daos[0]) as MiniDAO;
+
+  React.useEffect(() => {
+    if (!loaded) dispatch(onGetUserDaos());
+    //if (!dao.proposals)
+  }, [loaded]);
+
+  return { proposals: dao.proposals, loaded };
+};

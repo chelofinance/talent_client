@@ -12,36 +12,31 @@ export const AvatarElement: React.FunctionComponent<{
   size?: number;
   infoComponent?: JSX.Element;
 }> = (props) => {
-  const {badge, badgeContent, count, size, infoComponent} = props;
+  const { badge, badgeContent, count, size, infoComponent } = props;
 
   return (
     <div className="flex items-center gap-4">
       {badge ? (
         <Badge
           overlap="circular"
-          anchorOrigin={{vertical: "top", horizontal: "left"}}
+          anchorOrigin={{ vertical: "top", horizontal: "left" }}
           badgeContent={badgeContent}
         >
           <Avatar
             alt="Travis Howard"
             src="/multimedia/assets/ronald_duck.jpeg"
-            sx={{width: size || DEFAULT_SIZE, height: size || DEFAULT_SIZE}}
+            sx={{ width: size || DEFAULT_SIZE, height: size || DEFAULT_SIZE }}
           />
         </Badge>
       ) : (
         <Avatar
           alt="Travis Howard"
           src="/multimedia/assets/ronald_duck.jpeg"
-          sx={{width: size || DEFAULT_SIZE, height: size || DEFAULT_SIZE}}
+          sx={{ width: size || DEFAULT_SIZE, height: size || DEFAULT_SIZE }}
         />
       )}
-      {infoComponent || (
-        <div className="flex flex-col">
-          <p className="text-md font-semibold whitespace-nowrap">Ronald Duck</p>
-          <p className="text-xs text-gray-600">Ronald Duck</p>
-        </div>
-      )}
-      {count && (
+      {infoComponent}
+      {count >= 0 && (
         <div className="flex gap-2 font-semibold ml-5">
           <span>{count}</span>
           <ThumbUpOffAltIcon fontSize="medium" color="primary" />

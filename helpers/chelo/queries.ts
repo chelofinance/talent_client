@@ -70,9 +70,12 @@ export const GET_ALL_GIVEN_OWNER = /* GraphQL */ graphql(`
             voter {
               id
             }
-            support {
-              support
+            receipt {
+              reason
               weight
+              support {
+                support
+              }
             }
             timestamp
           }

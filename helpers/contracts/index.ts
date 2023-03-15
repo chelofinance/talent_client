@@ -46,3 +46,16 @@ export const getReceipt = async (tx: Promise<TransactionResponse> | TransactionR
 export const getInterface = (contractName: keyof typeof abis) => {
   return new ethers.utils.Interface(abis[contractName]);
 };
+
+export const getScriptType = (sighashOrSignature: string): ScriptType => {
+  const sighash =
+    sighashOrSignature[0] === "0" && sighashOrSignature[1] === "x"
+      ? sighashOrSignature
+      : new ethers.utils.Interface([`function ${sighashOrSignature}`]).getSighash(
+        sighashOrSignature
+      );
+
+  //if (getInterface("ERC20").getSighash("approve") === sighash) return "approve_tokens";
+
+  return "unknown";
+};
