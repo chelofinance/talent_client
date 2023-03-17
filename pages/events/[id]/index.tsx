@@ -104,15 +104,14 @@ const NewcomersList: React.FunctionComponent<{}> = () => {
   const router = useRouter();
   const {proposals} = useProposals();
 
-  const handleClick = () => {
-    const eventId = "1";
-    router.push(`/events/${eventId}/participants`);
+  const handleClick = (userIndex: string) => () => {
+    router.push(`/events/${userIndex}/participants`);
   };
 
   return (
     <Card className="px-12 py-10 pt-0 w-full bg-neutral-50 text-black rounded-3xl border border-gray-200 shadow-md">
-      {proposals.map(({metadata, votesYes}) => (
-        <div className={"mt-8 hover:bg-gray-100"} onClick={handleClick}>
+      {proposals.map(({metadata, votesYes}, i) => (
+        <div className={"mt-8 hover:bg-gray-100"} onClick={handleClick(String(i))}>
           <AvatarElement
             badge={true}
             count={Number(votesYes)}

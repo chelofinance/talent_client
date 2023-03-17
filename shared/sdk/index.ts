@@ -24,12 +24,12 @@ export class DaoManager {
           : [];
 
     return Promise.all(
-      daos.map(async (dao) => {
+      daos.map((dao) => {
         const controller =
           dao.type === "aragon"
             ? new AragonController(dao, provider)
             : new MiniDaoController(dao, provider);
-        return await controller.load();
+        return controller.load() as any;
       })
     );
   }

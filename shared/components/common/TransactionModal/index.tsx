@@ -56,11 +56,10 @@ const scriptTypeMessages: Record<ScriptType, string> = {
 };
 
 export const TransactionModal: React.FunctionComponent<TransactionModalProps> = (props) => {
-  const {txs, dao: daoId, type, showModal, setShowModal, customExecute} = props;
-  const {chainId, provider, connector} = useWeb3React();
+  const {txs, dao: daoId, type, showModal, setShowModal, customExecute, metadata} = props;
+  const {provider} = useWeb3React();
   const {daos} = useAppSelector((state) => state);
   const dispatch = useAppDispatch();
-  const mini_daos = useGetMiniDaos();
   const loading =
     txs.some((tx) => tx.status !== "waiting" && tx.status !== undefined) &&
     !txs.every((tx) => tx.status === "executed");
@@ -125,7 +124,7 @@ export const TransactionModal: React.FunctionComponent<TransactionModalProps> = 
     const controller = new MiniDaoController(dao, provider);
 
     changeTransactionStatus("sent");
-    const tx = await controller.propose(txs);
+    const tx = await controller.propose(txs, {description: (metadata as {cid: string}).cid});
     await tx.wait();
   };
 

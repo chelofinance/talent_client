@@ -8,6 +8,7 @@ import {Button, TextInput} from "@shared/components/common/Forms";
 import {useAppDispatch} from "@redux/store";
 import {onShowTransaction} from "@redux/actions";
 import {useDaos} from "@shared/hooks/daos";
+import {uploadJson} from "@helpers/chelo";
 
 type FormValues = {
   firstName: string;
@@ -19,23 +20,39 @@ const AddParticipant = () => {
   const router = useRouter();
   const {daos, loaded} = useDaos();
   const dispatch = useAppDispatch();
-  const eventId = router.query.id;
 
-  const handleNormalSubmit = (values: FormValues) => {
+  const handleNormalSubmit = async (values: FormValues) => {
     const dao = daos[0] as MiniDAO;
-    dispatch(
-      onShowTransaction({
-        txs: [
-          {
-            to: dao.token.address,
-            signature: "mint(address to,uint256 amount)",
-            args: [values.wallet, 100], //TODO calculate mint amount
+    const data: MiniDaoProposal["metadata"] = {
+      title: "Add member to Talent DAO",
+      description: `Member is ${values.firstName} ${values.lastName}`,
+      metadata: {
+        firstName: values.firstName,
+        lastName: values.lastName,
+        wallet: values.wallet,
+      },
+    };
+
+    try {
+      dispatch(
+        onShowTransaction({
+          txs: [
+            {
+              to: dao.token.address,
+              signature: "mint(address,uint256)",
+              args: [values.wallet, 1], //TODO calculate mint amount
+            },
+          ],
+          dao: dao.id,
+          type: "chelo",
+          metadata: {
+            cid: await uploadJson(data),
           },
-        ],
-        dao: dao.id,
-        type: "chelo",
-      })
-    );
+        })
+      );
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   return (
@@ -61,7 +78,7 @@ const AddParticipant = () => {
                   return Yup.object({
                     firstName: Yup.string().required("Principal required"),
                     lastName: Yup.string().required("APR required"),
-                    wallet: Yup.string().required("User wallet required"),
+                    wallet: (Yup.string().required("User wallet required") as any).isEthAddress(),
                   });
                 })}
               >
@@ -70,21 +87,19 @@ const AddParticipant = () => {
                     <Form className="flex flex-col justify-between items-center w-full h-full">
                       <TextInput
                         white
-                        name="principal"
+                        name="firstName"
                         classes={{root: "w-full mb-4"}}
                         placeholder="First Name"
                       />
                       <TextInput
                         white
-                        name="apr"
-                        type="number"
+                        name="lastName"
                         classes={{root: "w-full mb-4"}}
                         placeholder="Last Name"
                       />
                       <TextInput
                         white
-                        name="apr"
-                        type="number"
+                        name="wallet"
                         classes={{root: "w-full"}}
                         placeholder="Wallet Address"
                       />

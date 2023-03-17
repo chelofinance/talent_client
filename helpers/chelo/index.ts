@@ -1,5 +1,6 @@
 import axios from "axios";
 import {ethers} from "ethers";
+import {Web3Storage} from "web3.storage";
 
 import {makeQuery} from "@helpers/connection";
 import {getNetworkConfig} from "@helpers/network";
@@ -135,3 +136,18 @@ export async function getIpfsProposal(cid: string): Promise<MiniDaoProposal["met
   const response = await axios.get<MiniDaoProposal["metadata"]>(url);
   return response.data;
 }
+
+export const upload = async (files: File[]) => {
+  const client = new Web3Storage({token: process.env.NEXT_PUBLIC_WEB3_STORAGE as string});
+
+  return await client.put(files, {
+    maxRetries: 3,
+  });
+};
+
+export const uploadJson = async (data: Record<string, unknown>) => {
+  const blob = new Blob([JSON.stringify(data)], {type: "application/json"});
+  const file = new File([blob], "upload.json", {type: "application/json"});
+
+  return await upload([file]);
+};

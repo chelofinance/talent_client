@@ -59,18 +59,19 @@ export class MiniDaoController implements DaoController {
   }
 
   public async propose(txs: CheloTransactionRequest[], options?: {description?: string}) {
-    const core = attach("Core", this.dao.id, this.connection.provider);
+    const core = attach("Core", this.dao.id, this.connection.provider.getSigner());
     const {targets, values, calldatas} = txs.reduce(
       (acc, cur) => {
-        const iface = new ethers.utils.Interface([cur.signature]);
+        const iface = new ethers.utils.Interface([`function ${cur.signature}`]);
         return {
           targets: acc.targets.concat([cur.to]),
-          values: acc.values.concat([cur.value]),
+          values: acc.values.concat([cur.value || "0"]),
           calldatas: acc.calldatas.concat([iface.encodeFunctionData(cur.signature, cur.args)]),
         };
       },
-      {targets: [], values: [], calldatas: []}
+      {targets: [] as string[], values: [] as string[], calldatas: [] as string[]}
     );
+    console.log(targets, values, calldatas, options?.description || "");
 
     return core.propose(targets, values, calldatas, options?.description || "");
   }

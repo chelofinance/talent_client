@@ -9,10 +9,12 @@ type UserState = {
         address: string;
         wallet: ConnectionType;
         networkId: SupportedNetworks;
+        subscribed: boolean;
     };
     transaction: {
         tx: TransactionMeta;
         open: boolean;
+        metadata?: unknown;
     };
     assets: {
         erc721: {address: string; id: string}[];
@@ -31,6 +33,7 @@ const user_state: UserState = {
         address: "",
         wallet: ConnectionType.INJECTED,
         networkId: null,
+        subscribed: false,
     },
     transaction: {
         tx: {
@@ -68,7 +71,16 @@ export const userReducer = createReducer(user_state, (builder) => {
     builder.addCase(actions.onShowTransaction, (state: UserState, action) => {
         if (action.payload === false || action.payload === true)
             state.transaction.open = action.payload;
-        else state.transaction = {tx: {...action.payload}, open: true};
+        else
+            state.transaction = {
+                tx: {...action.payload},
+                open: true,
+                metadata: action.payload.metadata,
+            };
+    });
+
+    builder.addCase(actions.onSubscribeEvents.fulfilled, (state: UserState, action) => {
+        state.account.subscribed = action.payload;
     });
 
     //error handling
