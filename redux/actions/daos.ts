@@ -34,6 +34,7 @@ export const onGetUserDaos = createAsyncThunk<
 interface CreateProposalArgs {
   proposalId: BigNumber;
   proposer: string;
+  roundId: BigNumber;
   targets: string[];
   values: BigNumber[];
   signatures: string[];
@@ -48,6 +49,7 @@ export const onCreateProposal = createAsyncThunk(
   actionTypes.CREATE_PROPOSAL,
   async ({
     proposalId,
+    roundId,
     proposer,
     targets,
     values,
@@ -60,6 +62,7 @@ export const onCreateProposal = createAsyncThunk(
   }: CreateProposalArgs) => {
     const metadata = await getIpfsProposal(`${description}/upload.json`);
     const proposal: MiniDaoProposal = {
+      roundId: roundId.toString(),
       description,
       endBlock: endBlock.toString(),
       id: coreAddress + "/" + proposalId.toHexString(),

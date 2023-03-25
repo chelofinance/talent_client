@@ -1,4 +1,5 @@
 import {graphql} from "__generated__/gql";
+import gql from "graphql-tag";
 
 export const GET_ACCOUNT = graphql(/* GraphQL */ `
   query GetAccount($id: ID!) {
@@ -8,8 +9,14 @@ export const GET_ACCOUNT = graphql(/* GraphQL */ `
   }
 `);
 
-export const GET_ALL_GIVEN_OWNER = /* GraphQL */ graphql(`
+export const GET_ALL_GIVEN_OWNER = /* GraphQL */ gql`
   query GovernorsForOwner($id: ID!) {
+    proposalRounds {
+      id
+      endBlock
+      description
+      startBlock
+    }
     account(id: $id) {
       ownerOf {
         id
@@ -19,7 +26,6 @@ export const GET_ALL_GIVEN_OWNER = /* GraphQL */ graphql(`
         quorum
         token {
           id
-          implId
           asERC20 {
             name
             symbol
@@ -56,6 +62,9 @@ export const GET_ALL_GIVEN_OWNER = /* GraphQL */ graphql(`
         }
         proposals {
           proposalId
+          round {
+            id
+          }
           proposer {
             id
           }
@@ -80,20 +89,7 @@ export const GET_ALL_GIVEN_OWNER = /* GraphQL */ graphql(`
             timestamp
           }
         }
-        allowers {
-          allower {
-            id
-            implId
-            asAccount {
-              id
-            }
-            updates {
-              timestamp
-              data
-            }
-          }
-        }
       }
     }
   }
-`);
+`;

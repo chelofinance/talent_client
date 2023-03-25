@@ -30,38 +30,6 @@ type CheloTransactionRequest = {
   description?: string;
 };
 
-type AragonVote = {
-  id: number;
-  active: boolean;
-  executed: boolean;
-  creation: {
-    block: number;
-    timestamp: number;
-    txHash: string;
-  };
-  execution?: {
-    block: number;
-    timestamp: number;
-    txHash: string;
-  };
-  supportRequired: number;
-  minAcceptQuorum: number;
-  votesYes: string;
-  votesNo: string;
-  script: {to: string; data: string}[];
-  parsedScript: {
-    type: ScriptType;
-    meta: any;
-    value: string;
-    to: string;
-    args: any;
-    signature: string;
-    sighash: string;
-  }[];
-  issuer: string;
-  metadata: any;
-};
-
 interface ERC721 {
   address: string;
   id: string;
@@ -122,7 +90,26 @@ interface AragonDAO extends DAO {
   votes?: AragonVote[];
 }
 
+type ProposalRound = {
+  id: string;
+  startBlock: BigInt;
+  endBlock: BigInt;
+  description: string;
+  metadata?: {
+    title: string;
+    description: string;
+    image: string;
+    metadata: {
+      startDate: number;
+      endDate: number;
+      location: string;
+    };
+  };
+  proposals: MiniDaoProposal[];
+};
+
 type MiniDaoProposal = {
+  roundId: string;
   description: string;
   endBlock: string;
   id: string;
@@ -149,7 +136,7 @@ interface MiniDAO extends DAO {
   votingDelay: string;
   votingPeriod: string;
   quorum: string;
-  proposals?: MiniDaoProposal[];
+  rounds?: ProposalRound[];
 }
 
 type AragonApp = {

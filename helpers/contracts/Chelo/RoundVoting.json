@@ -5,65 +5,25 @@
     "type": "error"
   },
   {
-    "inputs": [],
-    "name": "InvalidInput",
-    "type": "error"
-  },
-  {
     "inputs": [
       {
-        "components": [
-          {
-            "internalType": "address",
-            "name": "target",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "value",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bytes",
-            "name": "data",
-            "type": "bytes"
-          },
-          {
-            "internalType": "bytes",
-            "name": "context",
-            "type": "bytes"
-          }
-        ],
-        "internalType": "struct IAllower.Transaction",
+        "internalType": "address",
         "name": "",
-        "type": "tuple"
-      }
-    ],
-    "name": "InvalidProposal",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "LifetimeNotReached",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "LifetimeReached",
-    "type": "error"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "contract IAllower",
-        "name": "allower",
         "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "",
+        "type": "bytes"
       }
     ],
-    "name": "AddedAllower",
-    "type": "event"
+    "name": "TransactionFailed",
+    "type": "error"
   },
   {
     "anonymous": false,
@@ -184,6 +144,12 @@
       {
         "indexed": false,
         "internalType": "uint256",
+        "name": "roundId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
         "name": "startBlock",
         "type": "uint256"
       },
@@ -220,51 +186,13 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "uint256",
-        "name": "oldProposalThreshold",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "newProposalThreshold",
+        "name": "id",
         "type": "uint256"
       }
     ],
-    "name": "ProposalThresholdSet",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "oldQuorumNumerator",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "newQuorumNumerator",
-        "type": "uint256"
-      }
-    ],
-    "name": "QuorumNumeratorUpdated",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "contract IAllower",
-        "name": "allower",
-        "type": "address"
-      }
-    ],
-    "name": "RemovedAllower",
+    "name": "RoundCreated",
     "type": "event"
   },
   {
@@ -361,44 +289,6 @@
     "type": "event"
   },
   {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "oldVotingDelay",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "newVotingDelay",
-        "type": "uint256"
-      }
-    ],
-    "name": "VotingDelaySet",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "oldVotingPeriod",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "newVotingPeriod",
-        "type": "uint256"
-      }
-    ],
-    "name": "VotingPeriodSet",
-    "type": "event"
-  },
-  {
     "inputs": [],
     "name": "BALLOT_TYPEHASH",
     "outputs": [
@@ -438,30 +328,11 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "contract IAllower[]",
-        "name": "newAllowers",
-        "type": "address[]"
-      }
-    ],
-    "name": "addAllowers",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "allowers",
+    "inputs": [],
+    "name": "baseWallet",
     "outputs": [
       {
-        "internalType": "contract IAllower",
+        "internalType": "contract IBaseWallet",
         "name": "",
         "type": "address"
       }
@@ -681,6 +552,48 @@
   {
     "inputs": [
       {
+        "internalType": "string",
+        "name": "description",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "executeThreshold",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint64",
+        "name": "deadline",
+        "type": "uint64"
+      }
+    ],
+    "name": "createRound",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "currentRound",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address[]",
         "name": "targets",
         "type": "address[]"
@@ -713,13 +626,60 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "getAllowers",
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "roundId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getRound",
     "outputs": [
       {
-        "internalType": "contract IAllower[]",
+        "components": [
+          {
+            "components": [
+              {
+                "internalType": "uint64",
+                "name": "_deadline",
+                "type": "uint64"
+              }
+            ],
+            "internalType": "struct TimersUpgradeable.BlockNumber",
+            "name": "voteStart",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint64",
+                "name": "_deadline",
+                "type": "uint64"
+              }
+            ],
+            "internalType": "struct TimersUpgradeable.BlockNumber",
+            "name": "voteEnd",
+            "type": "tuple"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "proposals",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "string",
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "executeThreshold",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct RoundVotingBase.ProposalRound",
         "name": "",
-        "type": "address[]"
+        "type": "tuple"
       }
     ],
     "stateMutability": "view",
@@ -839,51 +799,19 @@
   {
     "inputs": [
       {
-        "components": [
-          {
-            "internalType": "string",
-            "name": "name",
-            "type": "string"
-          },
-          {
-            "internalType": "uint256",
-            "name": "lifetime",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "votingPeriod",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "votingDelay",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "quorum",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "proposalThreshold",
-            "type": "uint256"
-          }
-        ],
-        "internalType": "struct ICore.InitialSettings",
-        "name": "settings",
-        "type": "tuple"
+        "internalType": "contract IBaseWallet",
+        "name": "_baseWallet",
+        "type": "address"
       },
       {
         "internalType": "contract IVotesUpgradeable",
-        "name": "initToken",
+        "name": "token",
         "type": "address"
       },
       {
-        "internalType": "contract IRegistry",
-        "name": "_registry",
-        "type": "address"
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
       }
     ],
     "name": "initialize",
@@ -892,13 +820,19 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "lifetime",
-    "outputs": [
+    "inputs": [
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "proposalId",
         "type": "uint256"
+      }
+    ],
+    "name": "isTopThreshold",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
       }
     ],
     "stateMutability": "view",
@@ -1157,45 +1091,6 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address[]",
-        "name": "targets",
-        "type": "address[]"
-      },
-      {
-        "internalType": "uint256[]",
-        "name": "values",
-        "type": "uint256[]"
-      },
-      {
-        "internalType": "bytes[]",
-        "name": "calldatas",
-        "type": "bytes[]"
-      },
-      {
-        "internalType": "bytes[]",
-        "name": "context",
-        "type": "bytes[]"
-      },
-      {
-        "internalType": "string",
-        "name": "description",
-        "type": "string"
-      }
-    ],
-    "name": "proposeWithAllowerContext",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
     "inputs": [],
     "name": "proxiableUUID",
     "outputs": [
@@ -1228,64 +1123,6 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "quorumDenominator",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "blockNumber",
-        "type": "uint256"
-      }
-    ],
-    "name": "quorumNumerator",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "quorumNumerator",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "registry",
-    "outputs": [
-      {
-        "internalType": "contract IRegistry",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "internalType": "address",
@@ -1309,152 +1146,8 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "allowerIndex",
-        "type": "uint256"
-      }
-    ],
-    "name": "removeAllower",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
     "inputs": [],
     "name": "renounceOwnership",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32[]",
-        "name": "assetTypes",
-        "type": "bytes32[]"
-      },
-      {
-        "internalType": "address[]",
-        "name": "targets",
-        "type": "address[]"
-      },
-      {
-        "internalType": "address[]",
-        "name": "receivers",
-        "type": "address[]"
-      },
-      {
-        "internalType": "uint256[]",
-        "name": "ids",
-        "type": "uint256[]"
-      }
-    ],
-    "name": "returnBatchOnExpiry",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "contract IERC1155",
-        "name": "token",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "receiver",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "id",
-        "type": "uint256"
-      }
-    ],
-    "name": "returnERC1155OnExpiry",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "contract IERC20",
-        "name": "token",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "receiver",
-        "type": "address"
-      }
-    ],
-    "name": "returnERC20OnExpiry",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "contract IERC721",
-        "name": "token",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "receiver",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "id",
-        "type": "uint256"
-      }
-    ],
-    "name": "returnERC721OnExpiry",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "newProposalThreshold",
-        "type": "uint256"
-      }
-    ],
-    "name": "setProposalThreshold",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "newVotingDelay",
-        "type": "uint256"
-      }
-    ],
-    "name": "setVotingDelay",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "newVotingPeriod",
-        "type": "uint256"
-      }
-    ],
-    "name": "setVotingPeriod",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1470,7 +1163,7 @@
     "name": "state",
     "outputs": [
       {
-        "internalType": "enum IGovernorUpgradeable.ProposalState",
+        "internalType": "enum IRoundVoting.ProposalState",
         "name": "",
         "type": "uint8"
       }
@@ -1526,19 +1219,6 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "newQuorumNumerator",
-        "type": "uint256"
-      }
-    ],
-    "name": "updateQuorumNumerator",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "address",
         "name": "newImplementation",
         "type": "address"
@@ -1565,40 +1245,6 @@
     "name": "upgradeToAndCall",
     "outputs": [],
     "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "target",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "value",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes",
-        "name": "data",
-        "type": "bytes"
-      },
-      {
-        "internalType": "bytes",
-        "name": "context",
-        "type": "bytes"
-      }
-    ],
-    "name": "verifyTransaction",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
     "type": "function"
   },
   {

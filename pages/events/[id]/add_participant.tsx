@@ -22,7 +22,7 @@ const AddParticipant = () => {
   const dispatch = useAppDispatch();
 
   const handleNormalSubmit = async (values: FormValues) => {
-    const dao = daos[0] as MiniDAO;
+    const dao = daos[daos.length - 1] as MiniDAO;
     const data: MiniDaoProposal["metadata"] = {
       title: "Add member to Talent DAO",
       description: `Member is ${values.firstName} ${values.lastName}`,

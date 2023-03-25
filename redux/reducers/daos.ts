@@ -17,17 +17,22 @@ export const daoReducer = createReducer(dao_state, (builder) => {
             const {coreAddress, proposal} = action.payload;
             const dao = state.daos.find((dao: MiniDAO) => dao.id === coreAddress) as MiniDAO;
             if (dao) {
-                if (!dao.proposals) {
-                    dao.proposals = [];
+                if (!dao.rounds) {
+                    dao.rounds = [];
                 }
-                dao.proposals.push(proposal);
+                const roundIndex = dao.rounds.findIndex((round) => round.id === proposal.roundId);
+                dao.rounds[roundIndex].proposals.push(proposal);
             }
         })
         .addCase(actions.onVoteCast, (state, action) => {
             const {coreAddress, proposalId, support, votes} = action.payload;
             const dao = state.daos.find((dao: MiniDAO) => dao.id === coreAddress) as MiniDAO;
-            if (dao && dao.proposals) {
-                const proposal = dao.proposals.find((p) => p.proposalId === proposalId.toString());
+            const round = dao.rounds?.find((round) =>
+                round.proposals.some((prop) => prop.id === proposalId.toString())
+            );
+
+            if (dao && dao.rounds) {
+                const proposal = round.proposals.find((prop) => prop.id === proposalId.toString());
                 if (proposal) {
                     if (support == 1) {
                         proposal.votesYes = toBN(proposal.votesYes)
@@ -44,8 +49,12 @@ export const daoReducer = createReducer(dao_state, (builder) => {
             const dao = state.daos.find(
                 (dao: MiniDAO) => dao.token.address === coreAddress
             ) as MiniDAO;
-            if (dao && dao.proposals) {
-                const proposal = dao.proposals.find((p) => p.proposalId === proposalId.toString());
+            const round = dao.rounds?.find((round) =>
+                round.proposals.some((prop) => prop.id === proposalId.toString())
+            );
+
+            if (dao && round) {
+                const proposal = round.proposals.find((prop) => prop.id === proposalId.toString());
                 if (proposal) {
                     proposal.executed = true;
                 }

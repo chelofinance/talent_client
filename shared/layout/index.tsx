@@ -1,6 +1,7 @@
 import React from "react";
 import {useRouter} from "next/router";
 import {useWeb3React} from "@web3-react/core";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 
 import Sidebar from "@shared/components/common/Sidebar";
 import Navbar from "@shared/components/common/Navbar";
@@ -38,6 +39,10 @@ const Layout: React.FunctionComponent<Props> = ({children}) => {
     }
   }, [isActive, account, chainId]);
 
+  const goBack = () => {
+    router.back();
+  };
+
   return (
     <div className={`${isReturnRoute ? "bg-stone-100" : "bg-neutral-50"} w-full`}>
       <div className="flex font-montserrat flex">
@@ -49,7 +54,13 @@ const Layout: React.FunctionComponent<Props> = ({children}) => {
         )}
         <div className="w-full bg-no-repeat relative min-h-screen">
           <ErrorCard classes={{root: "absolute top-0 right-0"}} />
-          <div className={`z-50 relative h-full ${isReturnRoute && "md:px-36 sm:px-40 pt-20"}`}>
+          <div className={`z-50 relative h-full ${isReturnRoute && "md:px-36 sm:px-40 pt-32"}`}>
+            {isReturnRoute && (
+              <button onClick={goBack} className="flex items-center gap-1 text-violet-500">
+                <ArrowBackIosIcon />
+                <span>Back</span>
+              </button>
+            )}
             {children}
           </div>
         </div>

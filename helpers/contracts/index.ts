@@ -6,6 +6,7 @@ import {getProvider} from "@helpers/index";
 import aragon from "./Aragon";
 import chelo from "./Chelo";
 import {JsonRpcProvider, TransactionResponse, Web3Provider} from "@ethersproject/providers";
+import {getNetworkConfig} from "@helpers/network";
 
 export const abis = {
   ...aragon,
@@ -59,3 +60,15 @@ export const getScriptType = (sighashOrSignature: string): ScriptType => {
 
   return "unknown";
 };
+
+const BLOCK_TIME_SECONDS = 2; // Polygon network average block time is approximately 2 seconds
+
+export function calculateTimeInBlocks(args: {dateStart: Date; dateEnd: Date}) {
+  const {dateStart, dateEnd} = args;
+
+  const startTime = new Date(dateStart).getTime();
+  const endTime = new Date(dateEnd).getTime();
+  const timeDifferenceSeconds = (endTime - startTime) / 1000;
+
+  return Math.ceil(timeDifferenceSeconds / BLOCK_TIME_SECONDS);
+}

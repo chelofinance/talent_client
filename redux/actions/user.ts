@@ -139,7 +139,7 @@ export const onSubscribeEvents = createAsyncThunk<boolean, void, {state: RootSta
     const {provider: rpc} = getNetworkConfig(chainId);
     const provider = getProvider(rpc);
 
-    const coreContract = attach("Core", coreAddress, provider);
+    const coreContract = attach("RoundVoting", coreAddress, provider);
 
     coreContract.on(
       "ProposalCreated",
@@ -153,6 +153,7 @@ export const onSubscribeEvents = createAsyncThunk<boolean, void, {state: RootSta
           string[],
           BigNumber,
           BigNumber,
+          BigNumber,
           string,
           Log
         ]
@@ -164,6 +165,7 @@ export const onSubscribeEvents = createAsyncThunk<boolean, void, {state: RootSta
           values,
           signatures,
           calldatas,
+          roundId,
           startBlock,
           endBlock,
           description,
@@ -173,6 +175,7 @@ export const onSubscribeEvents = createAsyncThunk<boolean, void, {state: RootSta
           onCreateProposal({
             proposalId,
             proposer,
+            roundId,
             targets,
             values,
             signatures,

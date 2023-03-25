@@ -19,11 +19,10 @@ const Event = () => {
   const router = useRouter();
   const eventId = router.query.id;
   const proposal = proposals[Number(eventId)];
-  console.log({proposal, ev: Number(eventId)});
   const isFinished = false;
 
   const handleVoteYes = () => {
-    const dao = daos[0] as MiniDAO;
+    const dao = daos[daos.length - 1] as MiniDAO;
 
     dispatch(
       onShowTransaction({
@@ -36,7 +35,7 @@ const Event = () => {
           {
             to: dao.id,
             signature: "castVote(uint256,uint8)",
-            args: [proposal.id, 1],
+            args: [proposal.proposalId, 1],
           },
         ],
         type: "wallet",

@@ -73,8 +73,8 @@ export const networkConfigs: Record<NetworkName, NetworkConfig> = {
       erc1155: "0x09B42f364851157353Cd21491BfC66B76163729e",
     },
     endpoints: {
-      chelo: "https://api.thegraph.com/subgraphs/name/rcontre360/chelo_treasury_goerli",
-      chelo_aragon: "https://api.thegraph.com/subgraphs/name/rcontre360/chelo_aragon_goerli",
+      chelo: "https://api.thegraph.com/subgraphs/name/rcontre360/dao_subgraph",
+      chelo_aragon: "https://api.thegraph.com/subgraphs/name/rcontre360/dao_subgraph",
       explorer: `https://api-goerli.etherscan.io/api?apikey=${process.env.NEXT_PUBLIC_ETHERSCAN_KEY}`,
       aragon: null,
     },
@@ -163,7 +163,7 @@ export const networkConfigs: Record<NetworkName, NetworkConfig> = {
       erc1155: "0x05dBD799B5A2479F9116012789Fe611805Ab93Fb",
     },
     endpoints: {
-      chelo: "http://localhost:8000/subgraphs/name/rcontre360/dao_subgraph",
+      chelo: "http://localhost:8000/subgraphs/name/rcontre360/talent_subgraph",
       explorer: "",
       aragon: null,
     },

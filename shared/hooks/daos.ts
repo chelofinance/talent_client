@@ -21,19 +21,20 @@ export const useDaos = () => {
     loadDaos(loaded);
   }, [loaded]);
 
-  return {daos, loaded};
+  return {daos: daos as MiniDAO[], loaded};
 };
 
-export const useProposals = (daoId?: string) => {
+export const useProposals = (roundId: string) => {
   const {daos, loaded} = useAppSelector((state) => state.daos);
   const {provider} = useWeb3React();
   const dispatch = useAppDispatch();
-  const dao = (daoId ? daos.find((d) => d.id === daoId) : daos[0]) as MiniDAO;
+  const dao = daos[daos.length - 1] as MiniDAO;
+  const round = dao.rounds?.find((round) => round.id === roundId);
 
   React.useEffect(() => {
     if (!loaded) dispatch(onGetUserDaos(provider));
     //if (!dao.proposals)
   }, [loaded]);
 
-  return {proposals: dao.proposals, loaded};
+  return {proposals: round?.proposals || [], loaded};
 };

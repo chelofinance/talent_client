@@ -1,6 +1,7 @@
 import * as React from "react";
 import {HomeOutlined} from "@mui/icons-material";
 import {DashboardOutlined} from "@mui/icons-material";
+import {CalendarMonthOutlined} from "@mui/icons-material";
 
 import {useAppSelector} from "@redux/store";
 import LayoutDropdown, {DropdownElement} from "../LayoutDropdown";
@@ -16,6 +17,12 @@ const Sidebar = () => {
       url: "/dashboard",
       off: loaded,
       icon: <DashboardOutlined width={30} />,
+    },
+    {
+      label: "Create Event",
+      url: "/create_event",
+      off: loaded,
+      icon: <CalendarMonthOutlined width={30} />,
     },
   ];
 

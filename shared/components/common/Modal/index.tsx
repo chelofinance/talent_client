@@ -1,7 +1,8 @@
 import * as React from "react";
-import Box, { BoxProps } from "@mui/material/Box";
-import Modal from "@mui/base/ModalUnstyled";
-import { XIcon } from "@heroicons/react/solid";
+import Box from "@mui/material/Box";
+import {BoxProps} from "@mui/system";
+import {ModalUnstyled} from "@mui/core";
+import {XIcon} from "@heroicons/react/solid";
 
 interface ModalProps {
   content: any;
@@ -46,7 +47,7 @@ const ModalComp = ({
   }, [showModal]);
 
   return (
-    <Modal
+    <ModalUnstyled
       open={open}
       onClose={handleClose}
       classes={{
@@ -54,7 +55,7 @@ const ModalComp = ({
       }}
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description"
-      slots={{ backdrop: Backdrop }}
+      BackdropComponent={Backdrop}
     >
       <Box
         sx={style}
@@ -68,7 +69,7 @@ const ModalComp = ({
         </div>
         {content}
       </Box>
-    </Modal>
+    </ModalUnstyled>
   );
 };
 

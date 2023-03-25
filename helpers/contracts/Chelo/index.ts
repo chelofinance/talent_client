@@ -1,4 +1,4 @@
-import Core from "./Core.json";
+import RoundVoting from "./RoundVoting.json";
 import Registry from "./Registry.json";
 
-export default {Core, Registry};
+export default {RoundVoting, Registry};
