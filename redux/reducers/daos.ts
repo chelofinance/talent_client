@@ -13,6 +13,18 @@ export const daoReducer = createReducer(dao_state, (builder) => {
             state.daos.push(...action.payload);
             state.loaded = true;
         })
+        // Add this case in your reducer (inside builder)
+        .addCase(actions.onRoundCreated.fulfilled, (state, action) => {
+            const {round, daoId} = action.payload;
+            const dao = state.daos.find((dao: MiniDAO) => dao.id === daoId) as MiniDAO;
+            if (dao) {
+                if (!dao.rounds) {
+                    dao.rounds = [];
+                }
+                dao.rounds.push(round);
+            }
+        })
+
         .addCase(actions.onCreateProposal.fulfilled, (state, action) => {
             const {coreAddress, proposal} = action.payload;
             const dao = state.daos.find((dao: MiniDAO) => dao.id === coreAddress) as MiniDAO;
@@ -47,7 +59,7 @@ export const daoReducer = createReducer(dao_state, (builder) => {
         .addCase(actions.onProposalExecuted, (state, action) => {
             const {coreAddress, proposalId} = action.payload;
             const dao = state.daos.find(
-                (dao: MiniDAO) => dao.token.address === coreAddress
+                (dao: MiniDAO) => dao.id.toLowerCase() === coreAddress.toLowerCase()
             ) as MiniDAO;
             const round = dao.rounds?.find((round) =>
                 round.proposals.some((prop) => prop.id === proposalId.toString())

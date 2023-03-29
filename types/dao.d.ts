@@ -92,9 +92,11 @@ interface AragonDAO extends DAO {
 
 type ProposalRound = {
   id: string;
-  startBlock: BigInt;
-  endBlock: BigInt;
+  startBlock: string;
+  endBlock: string;
   description: string;
+  finished: boolean;
+  executeThreshold: number;
   metadata?: {
     title: string;
     description: string;
@@ -108,6 +110,13 @@ type ProposalRound = {
   proposals: MiniDaoProposal[];
 };
 
+type ProposalCall = {
+  proposalId: string;
+  target: string;
+  value: number;
+  calldata: string;
+};
+
 type MiniDaoProposal = {
   roundId: string;
   description: string;
@@ -119,15 +128,19 @@ type MiniDaoProposal = {
   votesYes: string;
   votesNo: string;
   votes?: {}[];
+  imageLocal?: string;
   metadata?: {
     title: string;
     description: string;
+    image: string;
     metadata: {
       firstName: string;
       lastName: string;
       wallet: string;
+      questions: {question: string; answer: string}[];
     };
   };
+  calls: ProposalCall[];
 };
 
 interface MiniDAO extends DAO {

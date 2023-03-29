@@ -5,7 +5,7 @@ import {Web3Storage} from "web3.storage";
 import {makeQuery} from "@helpers/connection";
 import {getNetworkConfig} from "@helpers/network";
 import {GovernorsForOwnerQuery} from "__generated__/gql/graphql";
-import {hash, toBN} from "..";
+import {getProvider, hash, toBN} from "..";
 import {GET_ALL_GIVEN_OWNER} from "./queries";
 
 export const VoteType = {
@@ -40,23 +40,13 @@ export const getUserCheloDAOs = async (args: {
   networkId: SupportedNetworks;
 }): Promise<MiniDAO[]> => {
   const {networkId} = args;
-  const {endpoints} = getNetworkConfig(networkId);
+  const {endpoints, provider: rpc} = getNetworkConfig(networkId);
+  const provider = getProvider(rpc);
   const res = await makeQuery<GovernorsForOwnerQuery>(endpoints.chelo, GET_ALL_GIVEN_OWNER, {
     //id: account,
     id: "0x17edD5734a7fE8B7c4C262283EA8F2de24449F6c",
   });
-
-  const getRoundInfo = async (round: ProposalRound) => {
-    const metadata = await getIpfsRound(round.description);
-    const imageUrl = ipfsToHttp(metadata.image);
-    try {
-      const validImage = await checkImage(imageUrl);
-      return {...round, metadata: {...metadata, image: validImage}};
-    } catch {
-      const defaultImage = "/multimedia/chelo/logo_black.png";
-      return {...round, metadata: {...metadata, image: defaultImage}};
-    }
-  };
+  const curBlock = await provider.getBlock("latest");
 
   const getProposalsInfo = async (governor: GovernorsForOwnerQuery["account"]["ownerOf"][0]) => {
     const proposalsInfo = await Promise.all(
@@ -101,6 +91,12 @@ export const getUserCheloDAOs = async (args: {
         metadata: proposalsInfo.find((info) => info.proposalId === proposal.proposalId),
         votesYes: yes.toString(),
         votesNo: yes.toString(),
+        calls: proposal.calls.map((call) => ({
+          proposalId: proposal.proposalId,
+          target: call.target.id,
+          value: call.value,
+          calldata: call.calldata,
+        })),
       };
     });
     const res: MiniDAO = {
@@ -129,10 +125,13 @@ export const getUserCheloDAOs = async (args: {
       quorum: governor.quorum as string,
       rounds: fullRounds.map((round) => {
         const roundProposals = proposals.filter((prop) => prop.roundId === round.id);
+        const finished = curBlock.number > Number(round.endBlock.toString());
+        console.log({finished, curBlock: curBlock.number, round: round.endBlock});
         return {
           ...round,
           id: parseInt(round.id.split("/")[1], 16).toString(),
           proposals: roundProposals,
+          finished,
         };
       }),
     };
@@ -157,6 +156,18 @@ export function getProposalId(
     )
   );
 }
+
+export const getRoundInfo = async (round: ProposalRound): Promise<ProposalRound> => {
+  const metadata = await getIpfsRound(round.description);
+  const imageUrl = ipfsToHttp(metadata.image);
+  try {
+    const validImage = await checkImage(imageUrl);
+    return {...round, metadata: {...metadata, image: validImage}};
+  } catch {
+    const defaultImage = "/multimedia/chelo/logo_black.png";
+    return {...round, metadata: {...metadata, image: defaultImage}};
+  }
+};
 
 export function ipfsToHttp(cid: string, gateway = "https://ipfs.io/ipfs/"): string {
   return `${gateway}${cid}`;

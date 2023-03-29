@@ -12,11 +12,22 @@ import {useDaos, useProposals} from "@shared/hooks/daos";
 const Event = () => {
   const {daos, loaded} = useDaos();
   const router = useRouter();
-  const isFinished = false;
+  const {proposals} = useProposals(router.query.id as string);
+
   const event = daos[0].rounds.find((round) => round.id === router.query.id);
+  const isFinished = event.finished;
 
   const handleAddList = () => {
     router.push(`/events/${router.query.id}/add_participant`);
+  };
+
+  const handleWinnerClick = (participantWallet: string) => () => {
+    router.push({
+      pathname: `/events/${router.query.id}/mint_nft`,
+      query: {
+        userId: participantWallet,
+      },
+    });
   };
 
   return (
@@ -24,7 +35,7 @@ const Event = () => {
       <div className="flex flex-col items-center w-full overflow-scroll pt-4 pb-4 h-full">
         <div className="w-full mb-20 flex justify-center gap-5">
           <Card
-            className={`p-4 max-w-6xl bg-neutral-50 text-black rounded-3xl border border-gray-200 shadow-md max-h-fit`}
+            className={`p-4 max-w-4xl bg-neutral-50 text-black rounded-3xl border border-gray-200 shadow-md max-h-fit`}
             custom
           >
             <div className="w-full flex justify-center rounded-2xl mb-5 w-full max-h-96 overflow-hidden">
@@ -44,60 +55,69 @@ const Event = () => {
             <div className="mb-4">
               <span className="text-violet-500 font-bold text-2xl">{event.metadata.title}</span>
             </div>
-            <div className="flex justify-between mb-10">
+            <div className="flex justify-between items-center mb-10">
               <div className="flex gap-3 items-center w-1/2">
-                <CalendarMonthIcon fontSize="large" color="primary" />
+                <span className="text-violet-500">
+                  <CalendarMonthIcon fontSize="medium" color="inherit" />
+                </span>
                 <div className="flex flex-col">
                   <p className="text-md">Date and time</p>
                   <p className="text-gray-500 text-md">
-                    {new Date(event.metadata.metadata.startDate).toLocaleDateString()} -{" "}
-                    {new Date(event.metadata.metadata.endDate).toLocaleDateString()}
+                    {new Date(event.metadata.metadata.startDate).toDateString()} -{" "}
+                    {new Date(event.metadata.metadata.endDate).toDateString()}
                   </p>
                 </div>
               </div>
               <div className="flex gap-3 items-center w-1/2">
-                <LocationOnIcon fontSize="large" color="primary" />
+                <span className="text-violet-500">
+                  <LocationOnIcon fontSize="medium" color="inherit" />
+                </span>
                 <div className="flex flex-col">
                   <p className="text-md">Location</p>
                   <p className="text-gray-500 text-md">{event.metadata.metadata.location}</p>
                 </div>
               </div>
+              {!isFinished && (
+                <Button
+                  className="w-64 p-2 text-violet-500 text-sm rounded-xl font-semibold"
+                  onClick={handleAddList}
+                >
+                  Add Candidate List
+                </Button>
+              )}
             </div>
             <div className="mb-10">
-              <p>{event.metadata.description}</p>
+              <p className="text-sm">{event.metadata.description}</p>
             </div>
             {isFinished && (
               <div>
-                <span className="text-violet-500 font-bold text-xl">Candidate Winner</span>
-                <div className="flex flex-wrap mt-5 px-5">
-                  <div className="flex items-center gap-4">
-                    <div className="rounded-full overflow-hidden" style={{height: 60}}>
-                      <img
-                        width={60}
-                        src="/multimedia/assets/ronald_duck.jpeg"
-                        className="rounded-full"
+                <span className="text-violet-500 font-bold text-xl">Candidate Winners</span>
+                <div className="flex flex-wrap gap-10 my-5 mx-10 justify-center">
+                  {proposals.map(({metadata}, i) => (
+                    <div
+                      key={i}
+                      className={"hover:bg-gray-100 cursor-pointer"}
+                      onClick={handleWinnerClick(metadata.metadata.wallet)}
+                    >
+                      <AvatarElement
+                        address={metadata.metadata.wallet}
+                        infoComponent={
+                          <div className="flex flex-col">
+                            <p className="text-md font-semibold whitespace-nowrap">{`${metadata.metadata.firstName} ${metadata.metadata.lastName}`}</p>
+                            <p className="text-xs text-gray-600">Alumni</p>
+                          </div>
+                        }
                       />
                     </div>
-
-                    <div className="flex flex-col">
-                      <p className="text-lg font-semibold">Ronald Duck</p>
-                      <p className="text-sm color-gray-500">Ronald Duck</p>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
             )}
           </Card>
-          {!isFinished && (
+          {!isFinished && proposals.length > 0 && (
             <div className="w-full flex flex-col ">
               <h2 className="text-violet-500 text-xl mb-4">Leaderboard</h2>
-              <NewcomersList />
-              <Button
-                className="w-1/2 p-2 bg-violet-500 text-sm text-white rounded-xl font-semibold mt-8"
-                onClick={handleAddList}
-              >
-                Add Candidate List
-              </Button>
+              <NewcomersList proposals={proposals} />
             </div>
           )}
         </div>
@@ -106,13 +126,17 @@ const Event = () => {
   );
 };
 
-const NewcomersList: React.FunctionComponent<{}> = () => {
+const NewcomersList: React.FunctionComponent<{proposals: MiniDaoProposal[]}> = (props) => {
+  const {proposals} = props;
   const router = useRouter();
-  const {proposals: prop} = useProposals(router.query.id as string);
-  const proposals = [...prop, ...prop, ...prop];
 
   const handleClick = (userIndex: string) => () => {
-    router.push(`/events/${userIndex}/participants`);
+    router.push({
+      pathname: `/events/${router.query.id}/participants`,
+      query: {
+        userId: userIndex,
+      },
+    });
   };
 
   return (
@@ -128,6 +152,7 @@ const NewcomersList: React.FunctionComponent<{}> = () => {
           >
             <AvatarElement
               badge={true}
+              address={metadata.metadata.wallet}
               count={Number(votesYes)}
               infoComponent={
                 <div className="flex flex-col">

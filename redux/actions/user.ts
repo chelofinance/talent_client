@@ -11,7 +11,7 @@ import {getNetworkConfig} from "@helpers/network";
 import {RootState} from "@redux/store";
 import {attach} from "@helpers/contracts";
 import {BigNumber} from "ethers";
-import {onCreateProposal, onProposalExecuted, onVoteCast} from "./daos";
+import {onCreateProposal, onProposalExecuted, onRoundCreated, onVoteCast} from "./daos";
 import {Log} from "@ethersproject/providers";
 
 export const onConnectWallet = createAsyncThunk<
@@ -124,6 +124,7 @@ export const onUpdateError = createAction(
 export const onShowTransaction = createAction(
   actionTypes.SHOW_TRANSACTION,
   (transactionInfo: TransactionMeta | boolean) => {
+    console.log({transactionInfo});
     return {
       payload: transactionInfo,
     };
@@ -200,6 +201,17 @@ export const onSubscribeEvents = createAsyncThunk<boolean, void, {state: RootSta
       dispatch(
         onProposalExecuted({
           proposalId,
+          coreAddress,
+        })
+      );
+    });
+
+    coreContract.on("RoundCreated", (...args: [BigNumber, Log]) => {
+      const [roundId, event] = args;
+      console.log("RoundCreated", roundId, event);
+      dispatch(
+        onRoundCreated({
+          roundId,
           coreAddress,
         })
       );

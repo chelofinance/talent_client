@@ -97,32 +97,22 @@ const CreateEvent = () => {
                 {({errors, ...props}) => {
                   return (
                     <Form className="flex flex-col justify-between items-center w-full h-full">
-                      <div className="w-full flex gap-3">
+                      <div className="w-full flex gap-3 items-start">
                         <TextInput
                           white
                           name="name"
                           classes={{root: "w-1/4 mb-4"}}
                           placeholder="Name"
                         />
-                        <TextInput
-                          white
-                          name="location"
-                          classes={{root: "w-3/4 mb-4"}}
-                          placeholder="Location"
-                        />
+                        <DateTimePicker label="Start Date and Time" name="startTime" />
+                        <DateTimePicker name="endTime" label="End Date and Time" />
                       </div>
-                      <div className="w-full flex gap-3">
-                        <DateTimePicker
-                          label="Start Date and Time"
-                          value={props.values.startTime}
-                          onChange={(date) => props.setFieldValue("startDate", date)}
-                        />
-                        <DateTimePicker
-                          label="End Date and Time"
-                          value={props.values.endTime}
-                          onChange={(date) => props.setFieldValue("endDate", date)}
-                        />
-                      </div>
+                      <TextInput
+                        white
+                        name="location"
+                        classes={{root: "w-full mb-4"}}
+                        placeholder="Location"
+                      />
                       <TextInput
                         white
                         name="description"

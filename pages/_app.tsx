@@ -6,6 +6,8 @@ import es from "date-fns/locale/es";
 import "react-datepicker/dist/react-datepicker.css";
 import * as Yup from "yup";
 import {ethers} from "ethers";
+import {AdapterDateFns} from "@mui/x-date-pickers/AdapterDateFns";
+import {LocalizationProvider} from "@mui/x-date-pickers/LocalizationProvider";
 
 import Web3Provider from "@shared/components/common/Web3Provider";
 import Layout from "../shared/layout";
@@ -24,11 +26,13 @@ function MyApp({Component, ...rest}) {
   const {store, props} = wrapper.useWrappedStore(rest);
   return (
     <Provider store={store}>
-      <Web3Provider>
-        <Layout>
-          <Component {...props.pageProps} />
-        </Layout>
-      </Web3Provider>
+      <LocalizationProvider dateAdapter={AdapterDateFns}>
+        <Web3Provider>
+          <Layout>
+            <Component {...props.pageProps} />
+          </Layout>
+        </Web3Provider>
+      </LocalizationProvider>
     </Provider>
   );
 }

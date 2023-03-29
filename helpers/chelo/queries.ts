@@ -62,18 +62,25 @@ export const GET_ALL_GIVEN_OWNER = /* GraphQL */ gql`
         }
         proposals {
           proposalId
-          round {
-            id
-          }
-          proposer {
-            id
-          }
           startBlock
           endBlock
           description
           canceled
           queued
           executed
+          calls {
+            calldata
+            value
+            target {
+              id
+            }
+          }
+          round {
+            id
+          }
+          proposer {
+            id
+          }
           votecast {
             id
             voter {

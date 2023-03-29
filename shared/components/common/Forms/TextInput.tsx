@@ -8,12 +8,15 @@ export interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
   noFormik?: boolean;
   white?: boolean;
   error?: string;
+  inputRef?: React.RefObject<HTMLInputElement>;
+  endAdornment?: React.ReactNode;
+  inputProps?: any;
 }
 
 export const TextInput = React.forwardRef<HTMLInputElement, Props>((props, ref) => {
-  const {classes, noFormik, white, error, label} = props;
+  const {classes, noFormik, white, error, label, inputRef, endAdornment, inputProps} = props;
   const [field, meta, helpers] = noFormik ? [] : useField(props as any);
-  const finalProps = noFormik ? {...props} : {...field, ...props};
+  const finalProps = noFormik ? {...props, ...inputProps} : {...field, ...props};
 
   return (
     <div className={clsx(classes?.root)} ref={ref}>
@@ -27,6 +30,7 @@ export const TextInput = React.forwardRef<HTMLInputElement, Props>((props, ref) 
       >
         <input
           {...finalProps}
+          ref={inputRef}
           className={clsx(
             white
               ? [
@@ -40,6 +44,7 @@ export const TextInput = React.forwardRef<HTMLInputElement, Props>((props, ref) 
             classes?.input
           )}
         />
+        {endAdornment}
       </div>
       {(error || meta?.error) && (
         <span className={`text-${white ? "red-300" : "red-300"} text-sm`}>

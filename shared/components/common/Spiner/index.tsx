@@ -5,14 +5,7 @@ export const Spiner: React.FunctionComponent<{color?: string; size?: number}> = 
   color,
   size,
 }) => {
-  return (
-    <CircularProgress
-      size={size}
-      sx={{
-        color: color || "orange",
-      }}
-    />
-  );
+  return <CircularProgress size={size} color="inherit" />;
 };
 
 export default Spiner;

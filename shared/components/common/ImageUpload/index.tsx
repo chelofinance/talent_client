@@ -12,11 +12,12 @@ const DropzoneContainer = styled("div")({
 
 type ImageUploadProps = {
   value: File | null;
+  text?: string;
   classes?: Partial<Record<"root", string>>;
   onChange: (file: File | null) => void;
 };
 
-const ImageUpload: React.FC<ImageUploadProps> = ({value, onChange, classes}) => {
+const ImageUpload: React.FC<ImageUploadProps> = ({value, onChange, classes, text}) => {
   const handleFileUpload = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files && e.target.files[0];
@@ -36,7 +37,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({value, onChange, classes}) => 
   return (
     <DropzoneContainer onClick={openFileDialog} className={classes?.root}>
       <Typography variant="body1">
-        {value ? "Image selected" : "Click or drag and drop an image"}
+        {value ? "Image selected" : text || "Click or drag and drop an image"}
       </Typography>
     </DropzoneContainer>
   );

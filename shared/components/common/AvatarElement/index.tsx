@@ -1,20 +1,21 @@
 import React from "react";
-import Avatar from "@mui/material/Avatar";
 import Badge from "@mui/material/Badge";
 import ThumbUpOffAltIcon from "@mui/icons-material/ThumbUpOffAlt";
 import clsx from "clsx";
+import Blockies from "react-blockies";
 
 const DEFAULT_SIZE = 50;
 
 export const AvatarElement: React.FunctionComponent<{
   badge?: boolean;
+  address?: string;
   badgeContent?: JSX.Element;
   count?: number;
   size?: number;
   infoComponent?: JSX.Element;
   classes?: Partial<Record<"root" | "avatar" | "badge" | "count", string>>;
 }> = (props) => {
-  const {badge, badgeContent, count, size, infoComponent, classes} = props;
+  const {badge, badgeContent, count, size, infoComponent, classes, address} = props;
 
   return (
     <div className={clsx("flex items-center gap-4", classes?.root)}>
@@ -25,18 +26,19 @@ export const AvatarElement: React.FunctionComponent<{
           badgeContent={badgeContent}
           className={clsx(classes?.badge)}
         >
-          <Avatar
-            alt="Travis Howard"
-            src="/multimedia/assets/ronald_duck.jpeg"
-            sx={{width: size || DEFAULT_SIZE, height: size || DEFAULT_SIZE}}
+          <Blockies
+            seed={address || "0x"}
+            size={10}
+            scale={size ? size / 10 : DEFAULT_SIZE / 10}
+            className="rounded-full"
           />
         </Badge>
       ) : (
-        <Avatar
-          className={clsx(classes?.avatar)}
-          alt="Travis Howard"
-          src="/multimedia/assets/ronald_duck.jpeg"
-          sx={{width: size || DEFAULT_SIZE, height: size || DEFAULT_SIZE}}
+        <Blockies
+          seed={address || "0x"}
+          size={10}
+          scale={size ? size / 10 : DEFAULT_SIZE / 10}
+          className="rounded-full"
         />
       )}
       {infoComponent}

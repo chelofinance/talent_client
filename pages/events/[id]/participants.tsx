@@ -1,6 +1,11 @@
 import React from "react";
 import {useRouter} from "next/router";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import MuiAccordion from "@mui/material/Accordion";
+import MuiAccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import Typography from "@mui/material/Typography";
+import {styled} from "@mui/system";
 
 import Card from "@shared/components/common/Card";
 import {Button} from "@shared/components/common/Forms";
@@ -10,15 +15,35 @@ import {useAppDispatch} from "@redux/store";
 import {onShowTransaction} from "@redux/actions";
 import {useWeb3React} from "@web3-react/core";
 
+const Accordion = styled(MuiAccordion)(({theme}) => ({
+  backgroundColor: "#f1f2f4",
+  borderRadius: theme.shape.borderRadius,
+  boxShadow: "none",
+  "&:not(:last-child)": {
+    marginBottom: theme.spacing(1),
+  },
+  "&:before": {
+    display: "none",
+  },
+  "& .Mui-expanded": {
+    margin: "0",
+  },
+}));
+
+const AccordionSummary = styled(MuiAccordionSummary)(() => ({
+  "& .MuiAccordionSummary-content": {
+    fontWeight: "bold",
+  },
+}));
+
 const Event = () => {
-  const {proposals} = useProposals();
+  const router = useRouter();
   const {daos} = useDaos();
   const {account} = useWeb3React();
+  const {proposals} = useProposals(router.query.id as string);
 
   const dispatch = useAppDispatch();
-  const router = useRouter();
-  const eventId = router.query.id;
-  const proposal = proposals[Number(eventId)];
+  const proposal = proposals[Number(router.query.userId)];
   const isFinished = false;
 
   const handleVoteYes = () => {
@@ -59,11 +84,15 @@ const Event = () => {
           >
             <div className="flex justify-between">
               <AvatarElement
+                address={proposal.metadata.metadata.wallet}
                 badge={true}
                 size={80}
                 infoComponent={
                   <div className="flex flex-col">
-                    <p className="text-lg font-semibold whitespace-nowrap">{`${proposal.metadata.metadata.firstName} ${proposal.metadata.metadata.lastName}`}</p>
+                    <div className="flex items-center">
+                      <p className="text-lg font-semibold ">{`${proposal.metadata.metadata.firstName} ${proposal.metadata.metadata.lastName}`}</p>
+                      <p className="text-gray-500 ml-2 text-sm">(Alumni)</p>
+                    </div>
                     <p className="text-xs">Identity: Male</p>
                     <p className="text-xs">Ethnicity: Latino</p>
                     <p className="text-xs">Nationality: Canada</p>
@@ -78,22 +107,20 @@ const Event = () => {
               </Button>
             </div>
             <div className="mb-10 mt-8">
-              <div className="bg-gray-100 px-5 py-4 rounded-xl flex justify-between mb-4">
-                <p>Question 1?</p>
-                <ExpandMoreIcon fontSize="large" color="primary" />
-              </div>
-              <div className="bg-gray-100 px-5 py-4 rounded-xl flex justify-between mb-4">
-                <p>Question 2?</p>
-                <ExpandMoreIcon fontSize="large" color="primary" />
-              </div>
-              <div className="bg-gray-100 px-5 py-4 rounded-xl flex justify-between mb-4">
-                <p>Question 3?</p>
-                <ExpandMoreIcon fontSize="large" color="primary" />
-              </div>
-              <div className="bg-gray-100 px-5 py-4 rounded-xl flex justify-between mb-4">
-                <p>Question 4?</p>
-                <ExpandMoreIcon fontSize="large" color="primary" />
-              </div>
+              {proposal.metadata.metadata.questions.map((q, index) => (
+                <Accordion key={index}>
+                  <AccordionSummary
+                    expandIcon={<ExpandMoreIcon />}
+                    aria-controls={`panel${index + 1}-content`}
+                    id={`panel${index + 1}-header`}
+                  >
+                    <Typography>{q.question}</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <Typography>{q.answer}</Typography>
+                  </AccordionDetails>
+                </Accordion>
+              ))}
             </div>
             {isFinished && (
               <div>
@@ -125,17 +152,29 @@ const Event = () => {
 
 const NewcomersList: React.FunctionComponent<{}> = (props) => {
   const router = useRouter();
-  const {proposals} = useProposals();
+  const {proposals} = useProposals(router.query.id as string);
 
   const handleClick = (userIndex: string) => () => {
-    router.push(`/events/${userIndex}/participants`);
+    router.push({
+      pathname: `/events/${router.query.id as string}/participants`,
+      query: {
+        userId: userIndex,
+      },
+    });
   };
 
   return (
-    <Card className="px-12 py-10 pt-0 w-full bg-neutral-50 text-black rounded-3xl border border-gray-200 shadow-md">
+    <Card
+      className="py-10 pt-0 w-full bg-neutral-50 text-black rounded-3xl border border-gray-200 shadow-md"
+      custom
+    >
+      <div className="p-4 border-b border-gray-200 flex justify-center">
+        <span className="text-violet-500 font-semibold">Candidates</span>
+      </div>
       {proposals.map(({metadata, votesYes}, i) => (
-        <div className={"mt-8 hover:bg-gray-100"} onClick={handleClick(String(i))}>
+        <div className={"mt-8 hover:bg-gray-100 px-8"} onClick={handleClick(String(i))}>
           <AvatarElement
+            address={metadata.metadata.wallet}
             badge={true}
             count={Number(votesYes)}
             infoComponent={

@@ -5,7 +5,10 @@ import * as actionTypes from "@redux/constants";
 import {RootState} from "@redux/store";
 import {DaoManager} from "@shared/sdk";
 import {BigNumber} from "ethers";
-import {getIpfsProposal} from "@helpers/chelo";
+import {getIpfsProposal, getRoundInfo} from "@helpers/chelo";
+import {attach} from "@helpers/contracts";
+import {getNetworkConfig} from "@helpers/network";
+import {getProvider} from "@helpers/index";
 
 export const onGetUserDaos = createAsyncThunk<
   DAO[],
@@ -62,6 +65,7 @@ export const onCreateProposal = createAsyncThunk(
   }: CreateProposalArgs) => {
     const metadata = await getIpfsProposal(`${description}/upload.json`);
     const proposal: MiniDaoProposal = {
+      calls: [],
       roundId: roundId.toString(),
       description,
       endBlock: endBlock.toString(),
@@ -101,3 +105,32 @@ export const onProposalExecuted = createAction(
     payload,
   })
 );
+
+export const onRoundCreated = createAsyncThunk<
+  {round: ProposalRound; daoId: string},
+  {roundId: BigNumber; coreAddress: string},
+  {state: RootState}
+>(actionTypes.ROUND_CREATED, async ({roundId, coreAddress}, {getState}) => {
+  const {
+    user: {
+      account: {networkId},
+    },
+  } = getState();
+  const {provider: rpc} = getNetworkConfig(networkId);
+  const provider = getProvider(rpc);
+  const block = await provider.getBlock("latest");
+  const coreContract = attach("RoundVoting", coreAddress, provider);
+  const rawRound = await coreContract.getRound(roundId);
+
+  const round: ProposalRound = {
+    id: roundId.toString(),
+    finished: block.number >= Number(rawRound.voteEnd),
+    startBlock: rawRound.voteStart.toString(),
+    endBlock: rawRound.voteEnd.toString(),
+    description: rawRound.description.toString(),
+    executeThreshold: rawRound.executeThreshold.toString(),
+    proposals: [],
+  };
+
+  return {round: await getRoundInfo(round), daoId: coreAddress};
+});

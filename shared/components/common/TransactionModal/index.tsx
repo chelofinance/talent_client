@@ -64,6 +64,7 @@ export const TransactionModal: React.FunctionComponent<TransactionModalProps> = 
     txs.some((tx) => tx.status !== "waiting" && tx.status !== undefined) &&
     !txs.every((tx) => tx.status === "executed");
 
+  console.log({metadata});
   const txsInfo = txs.map((tx) => {
     const scriptType = getScriptType(tx.signature);
     return {
@@ -81,6 +82,7 @@ export const TransactionModal: React.FunctionComponent<TransactionModalProps> = 
         txs: txs.map((txs) => ({...txs, status: newStatus})),
         dao: daoId,
         type,
+        metadata,
       })
     );
   };

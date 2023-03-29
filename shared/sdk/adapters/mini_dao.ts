@@ -59,7 +59,7 @@ export class MiniDaoController implements DaoController {
   }
 
   public async propose(txs: CheloTransactionRequest[], options?: {description?: string}) {
-    const core = attach("Core", this.dao.id, this.connection.provider.getSigner());
+    const core = attach("RoundVoting", this.dao.id, this.connection.provider.getSigner());
     const {targets, values, calldatas} = txs.reduce(
       (acc, cur) => {
         const iface = new ethers.utils.Interface([`function ${cur.signature}`]);
@@ -71,7 +71,6 @@ export class MiniDaoController implements DaoController {
       },
       {targets: [] as string[], values: [] as string[], calldatas: [] as string[]}
     );
-    console.log(targets, values, calldatas, options?.description || "");
 
     return core.propose(targets, values, calldatas, options?.description || "");
   }
