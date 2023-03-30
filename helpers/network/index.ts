@@ -73,7 +73,7 @@ export const networkConfigs: Record<NetworkName, NetworkConfig> = {
       erc1155: "0x09B42f364851157353Cd21491BfC66B76163729e",
     },
     endpoints: {
-      chelo: "https://api.thegraph.com/subgraphs/name/rcontre360/dao_subgraph",
+      chelo: "https://api.thegraph.com/subgraphs/name/rcontre360/talent_subgraph",
       chelo_aragon: "https://api.thegraph.com/subgraphs/name/rcontre360/dao_subgraph",
       explorer: `https://api-goerli.etherscan.io/api?apikey=${process.env.NEXT_PUBLIC_ETHERSCAN_KEY}`,
       aragon: null,

@@ -16,6 +16,7 @@ export class DaoManager {
       : 137;
 
     const daos: (AragonDAO | MiniDAO)[] = await getUserCheloDAOs({account, networkId: chainUsed});
+    console.log({daos});
 
     return Promise.all(
       daos.map((dao) => {

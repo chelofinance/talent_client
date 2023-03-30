@@ -19,12 +19,16 @@ export const makeQuery = async <T>(
   query: TypedDocumentNode<unknown, unknown>,
   variables?: unknown
 ) => {
-  const client = getApolloClient(uri);
+  try {
+    const client = getApolloClient(uri);
 
-  const res = await client.query<T>({
-    query,
-    variables,
-  });
-
-  return res.data;
+    const res = await client.query<T>({
+      query,
+      variables,
+    });
+    return res.data;
+  } catch (err) {
+    console.log("FETCH ERROR", err);
+  }
+  return null;
 };
