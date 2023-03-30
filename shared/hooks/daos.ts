@@ -29,7 +29,7 @@ export const useProposals = (roundId: string) => {
   const {provider} = useWeb3React();
   const dispatch = useAppDispatch();
   const dao = daos[daos.length - 1] as MiniDAO;
-  const round = dao.rounds?.find((round) => round.id === roundId);
+  const round = dao?.rounds?.find((round) => round.id === roundId);
 
   React.useEffect(() => {
     if (!loaded) dispatch(onGetUserDaos(provider));

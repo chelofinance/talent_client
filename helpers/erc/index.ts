@@ -19,48 +19,6 @@ export const getTokenList = async (): Promise<TokenList> => {
   return res.data;
 };
 
-export const approveERC1155 = (args: {contract: string; target: string}): TransactionRequest => {
-  const {contract, target} = args;
-  const erc1155 = attach("ERC1155", args.contract);
-
-  return {
-    to: contract,
-    data: erc1155.interface.encodeFunctionData("setApprovalForAll", [target, true]),
-    value: 0,
-  };
-};
-
-export const approveERC20 = (args: {
-  amount: string;
-  target: string;
-  contract: string;
-}): CheloTransactionRequest => {
-  const {amount, target, contract} = args;
-  console.log({approveERC20: args});
-
-  const res = {
-    to: contract,
-    signature: "approve(address,uint256)",
-    args: [target, amount],
-    value: 0,
-  };
-  return res;
-};
-
-export const approveERC721 = (args: {
-  id: string;
-  target: string;
-  contract: string;
-}): CheloTransactionRequest => {
-  const {contract, id, target} = args;
-
-  return {
-    to: contract,
-    signature: "approve(address,uint256)",
-    args: [target, id],
-  };
-};
-
 export const addDecimals = async (token: string, value: string, provider: string) => {
   const tokenContract = attach("ERC20", token, provider);
   const decimals = await tokenContract.decimals();

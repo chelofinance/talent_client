@@ -18,7 +18,7 @@ interface AutocompleteTokensProps {
 
 export const AutocompleteTokens: React.FunctionComponent<AutocompleteTokensProps> = (props) => {
   const {options, classes, value, onChange, error, label} = props;
-  const {tokenList} = useAppSelector((state) => state.user);
+  const {tokenList} = useAppSelector((state) => state.user as any);
   const labeledValue = {...value, label: `${value?.name || ""}@${value?.symbol || ""}`};
 
   const finalList = React.useMemo(() => {

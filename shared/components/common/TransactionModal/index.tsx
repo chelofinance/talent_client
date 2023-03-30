@@ -8,7 +8,6 @@ import {Button} from "@shared/components/common/Forms";
 import Modal from "@shared/components/common/Modal";
 import {TransactionMeta} from "types";
 import {useAppDispatch, useAppSelector} from "@redux/store";
-import {useGetMiniDaos} from "@shared/hooks/utils";
 import {useWeb3React} from "@web3-react/core";
 import {onShowTransaction, onUpdateError} from "@redux/actions";
 import {calculateGasMargin} from "@helpers/index";

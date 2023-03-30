@@ -14,8 +14,8 @@ const Event = () => {
   const router = useRouter();
   const {proposals} = useProposals(router.query.id as string);
 
-  const event = daos[0].rounds.find((round) => round.id === router.query.id);
-  const isFinished = event.finished;
+  const event = daos[0]?.rounds.find((round) => round.id === router.query.id);
+  const isFinished = event?.finished;
 
   const handleAddList = () => {
     router.push(`/events/${router.query.id}/add_participant`);
@@ -39,13 +39,13 @@ const Event = () => {
             custom
           >
             <div className="w-full flex justify-center rounded-2xl mb-5 w-full max-h-96 overflow-hidden">
-              {event.metadata.image === "/multimedia/chelo/logo_black.png" ? (
+              {event?.metadata.image === "/multimedia/chelo/logo_black.png" ? (
                 <div className="h-max-96 flex justify-center">
-                  <img src={event.metadata.image} alt="Event" className="h-full opacity-75" />
+                  <img src={event?.metadata.image} alt="Event" className="h-full opacity-75" />
                 </div>
               ) : (
                 <img
-                  src={event.metadata.image}
+                  src={event?.metadata.image}
                   alt="Event"
                   className="w-full object-none"
                   style={{height: "auto"}}
@@ -53,7 +53,7 @@ const Event = () => {
               )}
             </div>
             <div className="mb-4">
-              <span className="text-violet-500 font-bold text-2xl">{event.metadata.title}</span>
+              <span className="text-violet-500 font-bold text-2xl">{event?.metadata.title}</span>
             </div>
             <div className="flex justify-between items-center mb-10">
               <div className="flex gap-3 items-center w-1/2">
@@ -63,8 +63,8 @@ const Event = () => {
                 <div className="flex flex-col">
                   <p className="text-md">Date and time</p>
                   <p className="text-gray-500 text-md">
-                    {new Date(event.metadata.metadata.startDate).toDateString()} -{" "}
-                    {new Date(event.metadata.metadata.endDate).toDateString()}
+                    {new Date(event?.metadata.metadata.startDate).toDateString()} -{" "}
+                    {new Date(event?.metadata.metadata.endDate).toDateString()}
                   </p>
                 </div>
               </div>
@@ -74,7 +74,7 @@ const Event = () => {
                 </span>
                 <div className="flex flex-col">
                   <p className="text-md">Location</p>
-                  <p className="text-gray-500 text-md">{event.metadata.metadata.location}</p>
+                  <p className="text-gray-500 text-md">{event?.metadata.metadata.location}</p>
                 </div>
               </div>
               {!isFinished && (
@@ -87,7 +87,7 @@ const Event = () => {
               )}
             </div>
             <div className="mb-10">
-              <p className="text-sm">{event.metadata.description}</p>
+              <p className="text-sm">{event?.metadata.description}</p>
             </div>
             {isFinished && (
               <div>
@@ -97,13 +97,13 @@ const Event = () => {
                     <div
                       key={i}
                       className={"hover:bg-gray-100 cursor-pointer"}
-                      onClick={handleWinnerClick(metadata.metadata.wallet)}
+                      onClick={handleWinnerClick(metadata?.metadata.wallet)}
                     >
                       <AvatarElement
-                        address={metadata.metadata.wallet}
+                        address={metadata?.metadata.wallet}
                         infoComponent={
                           <div className="flex flex-col">
-                            <p className="text-md font-semibold whitespace-nowrap">{`${metadata.metadata.firstName} ${metadata.metadata.lastName}`}</p>
+                            <p className="text-md font-semibold whitespace-nowrap">{`${metadata?.metadata.firstName} ${metadata?.metadata.lastName}`}</p>
                             <p className="text-xs text-gray-600">Alumni</p>
                           </div>
                         }
@@ -152,12 +152,12 @@ const NewcomersList: React.FunctionComponent<{proposals: MiniDaoProposal[]}> = (
           >
             <AvatarElement
               badge={true}
-              address={metadata.metadata.wallet}
+              address={metadata?.metadata.wallet}
               count={Number(votesYes)}
               infoComponent={
                 <div className="flex flex-col">
-                  <p className="text-md font-semibold whitespace-nowrap">{`${metadata.metadata.firstName} ${metadata.metadata.lastName}`}</p>
-                  <p className="text-xs text-gray-600">{`${metadata.metadata.firstName} ${metadata.metadata.lastName}`}</p>
+                  <p className="text-md font-semibold whitespace-nowrap">{`${metadata?.metadata.firstName} ${metadata?.metadata.lastName}`}</p>
+                  <p className="text-xs text-gray-600">{`${metadata?.metadata.firstName} ${metadata.metadata.lastName}`}</p>
                 </div>
               }
               badgeContent={

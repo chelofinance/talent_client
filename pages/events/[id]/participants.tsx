@@ -84,13 +84,13 @@ const Event = () => {
           >
             <div className="flex justify-between">
               <AvatarElement
-                address={proposal.metadata.metadata.wallet}
+                address={proposal?.metadata?.metadata.wallet}
                 badge={true}
                 size={80}
                 infoComponent={
                   <div className="flex flex-col">
                     <div className="flex items-center">
-                      <p className="text-lg font-semibold ">{`${proposal.metadata.metadata.firstName} ${proposal.metadata.metadata.lastName}`}</p>
+                      <p className="text-lg font-semibold ">{`${proposal?.metadata?.metadata.firstName} ${proposal?.metadata?.metadata.lastName}`}</p>
                       <p className="text-gray-500 ml-2 text-sm">(Alumni)</p>
                     </div>
                     <p className="text-xs">Identity: Male</p>
@@ -107,7 +107,7 @@ const Event = () => {
               </Button>
             </div>
             <div className="mb-10 mt-8">
-              {proposal.metadata.metadata.questions.map((q, index) => (
+              {proposal?.metadata?.metadata.questions.map((q, index) => (
                 <Accordion key={index}>
                   <AccordionSummary
                     expandIcon={<ExpandMoreIcon />}
@@ -174,13 +174,13 @@ const NewcomersList: React.FunctionComponent<{}> = (props) => {
       {proposals.map(({metadata, votesYes}, i) => (
         <div className={"mt-8 hover:bg-gray-100 px-8"} onClick={handleClick(String(i))}>
           <AvatarElement
-            address={metadata.metadata.wallet}
+            address={metadata?.metadata.wallet}
             badge={true}
             count={Number(votesYes)}
             infoComponent={
               <div className="flex flex-col">
-                <p className="text-md font-semibold whitespace-nowrap">{`${metadata.metadata.firstName} ${metadata.metadata.lastName}`}</p>
-                <p className="text-xs text-gray-600">{`${metadata.metadata.firstName} ${metadata.metadata.lastName}`}</p>
+                <p className="text-md font-semibold whitespace-nowrap">{`${metadata?.metadata.firstName} ${metadata?.metadata.lastName}`}</p>
+                <p className="text-xs text-gray-600">{`${metadata?.metadata.firstName} ${metadata?.metadata.lastName}`}</p>
               </div>
             }
             badgeContent={

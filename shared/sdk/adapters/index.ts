@@ -17,5 +17,3 @@ export interface DaoController {
     vote(proposalId: string, support: boolean, options?: unknown): string;
   };
 }
-
-export * from "./aragon";

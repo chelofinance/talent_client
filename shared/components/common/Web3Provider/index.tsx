@@ -33,7 +33,7 @@ const getConnectionOrder = (selectedWallet: ConnectionType) => {
 };
 
 export default function Web3Provider({children}: {children: ReactNode}) {
-  const {wallet} = useAppSelector((state) => state.user);
+  const {wallet} = useAppSelector((state) => state.user.account);
   const connections = getConnectionOrder(wallet);
   const connectors: [Connector, Web3ReactHooks][] = connections.map(({hooks, connector}) => [
     connector,

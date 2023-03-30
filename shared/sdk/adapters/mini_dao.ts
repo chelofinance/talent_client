@@ -51,7 +51,7 @@ export class MiniDaoController implements DaoController {
   }
 
   public vote(proposalId: string, support: boolean, options?: {description?: string}) {
-    const core = attach("Core", this.dao.id, this.connection.provider);
+    const core = attach("RoundVoting", this.dao.id, this.connection.provider);
 
     return options?.description
       ? core.castVoteWithReason(proposalId, support, options.description)
@@ -77,7 +77,7 @@ export class MiniDaoController implements DaoController {
 
   public encodeCall = {
     vote(proposalId: string, support: boolean, options?: {description?: string}) {
-      const core = attach("Core", this.dao.id, this.connection.provider);
+      const core = attach("RoundVoting", this.dao.id, this.connection.provider);
 
       return options?.description
         ? core.encodeFunctionData("castVoteWithReason", [proposalId, support, options.description])
@@ -85,7 +85,7 @@ export class MiniDaoController implements DaoController {
     },
 
     propose(txs: CheloTransactionRequest[], options?: {description?: string}) {
-      const core = attach("Core", this.dao.id, this.connection.provider);
+      const core = attach("RoundVoting", this.dao.id, this.connection.provider);
       const {targets, values, calldatas} = txs.reduce(
         (acc, cur) => {
           const iface = new ethers.utils.Interface([cur.signature]);
