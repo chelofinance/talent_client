@@ -1,21 +1,21 @@
 import React from "react";
-import {useRouter} from "next/router";
+import { useRouter } from "next/router";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MuiAccordion from "@mui/material/Accordion";
 import MuiAccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
-import {styled} from "@mui/system";
+import { styled } from "@mui/system";
 
 import Card from "@shared/components/common/Card";
-import {Button} from "@shared/components/common/Forms";
+import { Button } from "@shared/components/common/Forms";
 import AvatarElement from "@shared/components/common/AvatarElement";
-import {useDaos, useProposals} from "@shared/hooks/daos";
-import {useAppDispatch} from "@redux/store";
-import {onShowTransaction} from "@redux/actions";
-import {useWeb3React} from "@web3-react/core";
+import { useDaos, useProposals } from "@shared/hooks/daos";
+import { useAppDispatch } from "@redux/store";
+import { onShowTransaction } from "@redux/actions";
+import { useWeb3React } from "@web3-react/core";
 
-const Accordion = styled(MuiAccordion)(({theme}) => ({
+const Accordion = styled(MuiAccordion)(({ theme }) => ({
   backgroundColor: "#f1f2f4",
   borderRadius: theme.shape.borderRadius,
   boxShadow: "none",
@@ -38,9 +38,9 @@ const AccordionSummary = styled(MuiAccordionSummary)(() => ({
 
 const Event = () => {
   const router = useRouter();
-  const {daos} = useDaos();
-  const {account} = useWeb3React();
-  const {proposals} = useProposals(router.query.id as string);
+  const { daos } = useDaos();
+  const { account } = useWeb3React();
+  const { proposals } = useProposals(router.query.id as string);
 
   const dispatch = useAppDispatch();
   const proposal = proposals[Number(router.query.userId)];
@@ -90,7 +90,7 @@ const Event = () => {
                 infoComponent={
                   <div className="flex flex-col">
                     <div className="flex items-center">
-                      <p className="text-lg font-semibold ">{`${proposal?.metadata?.metadata.firstName} ${proposal?.metadata?.metadata.lastName}`}</p>
+                      <p className="text-lg font-semibold ">{proposal?.metadata?.metadata.name}</p>
                       <p className="text-gray-500 ml-2 text-sm">(Alumni)</p>
                     </div>
                     <p className="text-xs">Identity: Male</p>
@@ -127,7 +127,7 @@ const Event = () => {
                 <span className="text-violet-500 font-bold text-xl">Candidate Winner</span>
                 <div className="flex flex-wrap mt-5 px-5">
                   <div className="flex items-center gap-4">
-                    <div className="rounded-full overflow-hidden" style={{height: 60}}>
+                    <div className="rounded-full overflow-hidden" style={{ height: 60 }}>
                       <img
                         width={60}
                         src="/multimedia/assets/ronald_duck.jpeg"
@@ -152,7 +152,7 @@ const Event = () => {
 
 const NewcomersList: React.FunctionComponent<{}> = (props) => {
   const router = useRouter();
-  const {proposals} = useProposals(router.query.id as string);
+  const { proposals } = useProposals(router.query.id as string);
 
   const handleClick = (userIndex: string) => () => {
     router.push({
@@ -171,7 +171,7 @@ const NewcomersList: React.FunctionComponent<{}> = (props) => {
       <div className="p-4 border-b border-gray-200 flex justify-center">
         <span className="text-violet-500 font-semibold">Candidates</span>
       </div>
-      {proposals.map(({metadata, votesYes}, i) => (
+      {proposals.map(({ metadata, votesYes }, i) => (
         <div className={"mt-8 hover:bg-gray-100 px-8"} onClick={handleClick(String(i))}>
           <AvatarElement
             address={metadata?.metadata.wallet}
@@ -179,8 +179,8 @@ const NewcomersList: React.FunctionComponent<{}> = (props) => {
             count={Number(votesYes)}
             infoComponent={
               <div className="flex flex-col">
-                <p className="text-md font-semibold whitespace-nowrap">{`${metadata?.metadata.firstName} ${metadata?.metadata.lastName}`}</p>
-                <p className="text-xs text-gray-600">{`${metadata?.metadata.firstName} ${metadata?.metadata.lastName}`}</p>
+                <p className="text-md font-semibold whitespace-nowrap">{metadata?.metadata.name}</p>
+                <p className="text-xs text-gray-600">{metadata?.metadata.name}</p>
               </div>
             }
             badgeContent={

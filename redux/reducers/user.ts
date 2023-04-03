@@ -71,12 +71,13 @@ export const userReducer = createReducer(user_state, (builder) => {
     builder.addCase(actions.onShowTransaction, (state: UserState, action) => {
         if (action.payload === false || action.payload === true)
             state.transaction.open = action.payload;
-        else
+        else {
             state.transaction = {
                 tx: {...action.payload},
-                open: true,
+                open: action.payload.showModal !== undefined ? action.payload.showModal : true,
                 metadata: action.payload.metadata,
             };
+        }
     });
 
     builder.addCase(actions.onSubscribeEvents.fulfilled, (state: UserState, action) => {

@@ -25,8 +25,10 @@ const ConnectionComponent: React.FunctionComponent<{
   onSelect?: Function;
   src: string;
   title: string;
+  disabled: boolean;
 }> = (props) => {
-  const {connection, onSelect, src, title} = props;
+  const {isActive} = useWeb3React();
+  const {connection, onSelect, src, title, disabled} = props;
 
   const handleConnection = async () => {
     try {
@@ -37,8 +39,14 @@ const ConnectionComponent: React.FunctionComponent<{
     }
   };
 
+  console.log({disabled});
   return (
-    <button className="hover:scale-125" onClick={handleConnection}>
+    <button
+      className={`${!disabled && "hover:scale-125"} ${disabled && "opacity-75"} ${isActive && "border-b-2 border-violet-500"
+        }`}
+      onClick={handleConnection}
+      disabled={disabled}
+    >
       <Image src={src} alt="me" width="50" height="50" />
       <p className="text-sm font-medium">{title}</p>
     </button>
@@ -111,6 +119,7 @@ export const WalletModal: React.FunctionComponent<WalletModalProps> = ({
                     src={k.src}
                     title={k.title}
                     connection={k.connection}
+                    disabled={selectedNetwork === null}
                   />
                 ))}
               </div>

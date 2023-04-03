@@ -10,7 +10,7 @@ import {TransactionMeta} from "types";
 import {useAppDispatch, useAppSelector} from "@redux/store";
 import {useWeb3React} from "@web3-react/core";
 import {onShowTransaction, onUpdateError} from "@redux/actions";
-import {calculateGasMargin} from "@helpers/index";
+import {calculateGasMargin, wait} from "@helpers/index";
 import {TransactionRequest} from "@ethersproject/providers";
 import {parseCheloTransaction} from "@helpers/chelo";
 import {MiniDaoController} from "@shared/sdk/adapters/mini_dao";
@@ -59,11 +59,10 @@ export const TransactionModal: React.FunctionComponent<TransactionModalProps> = 
   const {provider} = useWeb3React();
   const {daos} = useAppSelector((state) => state);
   const dispatch = useAppDispatch();
-  const loading =
-    txs.some((tx) => tx.status !== "waiting" && tx.status !== undefined) &&
-    !txs.every((tx) => tx.status === "executed");
+  const hideSend = !txs.every((tx) => tx.status === "executed");
+  const loading = txs.some((tx) => tx.status !== "waiting" && tx.status !== undefined) && hideSend;
+  const disableClose = txs.length > 1 && loading;
 
-  console.log({metadata});
   const txsInfo = txs.map((tx) => {
     const scriptType = getScriptType(tx.signature);
     return {
@@ -94,6 +93,7 @@ export const TransactionModal: React.FunctionComponent<TransactionModalProps> = 
     const {index, status, txs} = args;
     const newTxs = [...txs];
     newTxs[index] = {...newTxs[index], status};
+
     dispatch(
       onShowTransaction({
         txs: newTxs,
@@ -116,6 +116,7 @@ export const TransactionModal: React.FunctionComponent<TransactionModalProps> = 
       const tx = await signer.sendTransaction({...cur_tx, gasLimit});
       localTxsUpdates = updateTxStatus({index, status: "sent", txs: localTxsUpdates});
       await tx.wait();
+
       localTxsUpdates = updateTxStatus({index, status: "executed", txs: localTxsUpdates});
     }
   };
@@ -167,19 +168,22 @@ export const TransactionModal: React.FunctionComponent<TransactionModalProps> = 
               </div>
             ))}
           </div>
-          <Button
-            className={`bg-purple-400 text-white ${loading ? "px-6 py-2" : "p-2"
-              } rounded w-32 w-1/2`}
-            onClick={onSubmitTx}
-            loading={loading}
-          >
-            Sign transaction
-          </Button>
+          {hideSend && (
+            <Button
+              className={`bg-purple-400 text-white ${loading ? "px-6 py-2" : "p-2"
+                } rounded w-32 w-1/2`}
+              onClick={onSubmitTx}
+              loading={loading}
+            >
+              Sign transaction
+            </Button>
+          )}
         </div>
       }
       showModal={showModal}
       setShowModal={setShowModal}
       showBtn={false}
+      disableClose={disableClose}
     />
   );
 };

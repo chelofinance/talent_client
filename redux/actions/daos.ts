@@ -63,7 +63,7 @@ export const onCreateProposal = createAsyncThunk(
     description,
     coreAddress,
   }: CreateProposalArgs) => {
-    const metadata = await getIpfsProposal(`${description}/upload.json`);
+    const metadata = await getIpfsProposal(description);
     const proposal: MiniDaoProposal = {
       calls: [],
       roundId: roundId.toString(),

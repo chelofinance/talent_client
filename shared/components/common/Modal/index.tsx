@@ -11,6 +11,7 @@ interface ModalProps {
   showBtn?: boolean;
   showBtnText?: string;
   boxProps?: BoxProps;
+  disableClose?: boolean;
 }
 
 const style = {
@@ -28,6 +29,7 @@ const ModalComp = ({
   setShowModal,
   showBtn = true,
   showBtnText = "Toggle modal",
+  disableClose,
   boxProps,
 }: ModalProps) => {
   const [open, setOpen] = React.useState(showModal);
@@ -63,7 +65,11 @@ const ModalComp = ({
         {...boxProps}
       >
         <div className="flex flex-row justify-end w-full h-4">
-          <button onClick={onModalClose}>
+          <button
+            onClick={onModalClose}
+            disabled={disableClose}
+            className={disableClose && "text-gray-400"}
+          >
             <XIcon width={25} className="m-0" />
           </button>
         </div>

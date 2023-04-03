@@ -174,13 +174,13 @@ export function ipfsToHttp(cid: string, gateway = "https://ipfs.io/ipfs/"): stri
 }
 
 export async function getIpfsRound(cid: string): Promise<ProposalRound["metadata"]> {
-  const url = ipfsToHttp(`${cid}/upload.json`);
+  const url = ipfsToHttp(cid);
   const response = await axios.get<ProposalRound["metadata"]>(url);
   return response.data;
 }
 
 export async function getIpfsProposal(cid: string): Promise<MiniDaoProposal["metadata"]> {
-  const url = ipfsToHttp(`${cid}/upload.json`);
+  const url = ipfsToHttp(cid);
   const response = await axios.get<MiniDaoProposal["metadata"]>(url);
   return response.data;
 }
@@ -197,5 +197,5 @@ export const uploadJson = async (data: Record<string, unknown>) => {
   const blob = new Blob([JSON.stringify(data)], {type: "application/json"});
   const file = new File([blob], "upload.json", {type: "application/json"});
 
-  return await upload([file]);
+  return `${await upload([file])}/upload.json`;
 };

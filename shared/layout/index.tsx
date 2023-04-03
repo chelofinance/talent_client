@@ -53,7 +53,7 @@ const Layout: React.FunctionComponent<Props> = ({children}) => {
           </>
         )}
         <div className="w-full bg-no-repeat relative min-h-screen">
-          <ErrorCard classes={{root: "absolute top-0 right-0"}} />
+          <ErrorCard classes={{root: "absolute top-24 right-3"}} />
           <div className={`z-50 relative h-full ${isReturnRoute && "md:px-20 sm:px-40 pt-32"}`}>
             {isReturnRoute && (
               <button onClick={goBack} className="flex items-center gap-1 text-violet-500">

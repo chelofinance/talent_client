@@ -92,7 +92,7 @@ const Event = () => {
             {isFinished && (
               <div>
                 <span className="text-violet-500 font-bold text-xl">Candidate Winners</span>
-                <div className="flex flex-wrap gap-10 my-5 mx-10 justify-center">
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10 my-5 mx-10 justify-center">
                   {proposals.map(({metadata}, i) => (
                     <div
                       key={i}
@@ -103,7 +103,9 @@ const Event = () => {
                         address={metadata?.metadata.wallet}
                         infoComponent={
                           <div className="flex flex-col">
-                            <p className="text-md font-semibold whitespace-nowrap">{`${metadata?.metadata.firstName} ${metadata?.metadata.lastName}`}</p>
+                            <p className="text-md font-semibold whitespace-nowrap overflow-hidden text-ellipsis w-28">
+                              {metadata?.metadata.name}
+                            </p>
                             <p className="text-xs text-gray-600">Alumni</p>
                           </div>
                         }
@@ -156,8 +158,10 @@ const NewcomersList: React.FunctionComponent<{proposals: MiniDaoProposal[]}> = (
               count={Number(votesYes)}
               infoComponent={
                 <div className="flex flex-col">
-                  <p className="text-md font-semibold whitespace-nowrap">{`${metadata?.metadata.firstName} ${metadata?.metadata.lastName}`}</p>
-                  <p className="text-xs text-gray-600">{`${metadata?.metadata.firstName} ${metadata.metadata.lastName}`}</p>
+                  <p className="text-md font-semibold whitespace-nowrap">
+                    {metadata?.metadata.name}
+                  </p>
+                  <p className="text-xs text-gray-600">{metadata?.metadata.name}</p>
                 </div>
               }
               badgeContent={

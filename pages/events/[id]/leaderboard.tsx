@@ -48,8 +48,10 @@ const Leaderboard: React.FunctionComponent = () => {
                   classes={{root: "w-full flex justify-between"}}
                 />
                 <div className="flex flex-col">
-                  <p className="text-md font-semibold whitespace-nowrap">{`${metadata.metadata.firstName} ${metadata.metadata.lastName}`}</p>
-                  <p className="text-xs text-gray-600">{`${metadata.metadata.firstName} ${metadata.metadata.lastName}`}</p>
+                  <p className="text-md font-semibold whitespace-nowrap">
+                    {metadata?.metadata.name}
+                  </p>
+                  <p className="text-xs text-gray-600">{metadata?.metadata.name}</p>
                 </div>
               </div>
               <div className={"flex gap-2 font-semibold ml-5"}>

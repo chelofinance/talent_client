@@ -87,7 +87,7 @@ const Dashboard = () => {
               <span className="text-xl">There are no DAOs to show</span>
             </div>
           ) : (
-            <div className="w-full h-full flex justify-center items-center text-violet-500">
+            <div className="w-full h-96 flex justify-center items-center text-violet-500">
               <Spiner size={50} />
             </div>
           )}

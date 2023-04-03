@@ -60,18 +60,18 @@ export const WALLETS = [
     value: "metamask",
     connection: metamaskConnection,
   },
-  {
-    src: "/multimedia/wallets/coinbase.png",
-    title: "Coinbase",
-    value: "coinbase",
-    connection: coinbaseWalletConnection,
-  },
-  {
-    src: "/multimedia/wallets/walletconnect.png",
-    title: "Wallet Connect",
-    value: "walletconnect",
-    connection: walletConnectConnection,
-  },
+  //{
+  //src: "/multimedia/wallets/coinbase.png",
+  //title: "Coinbase",
+  //value: "coinbase",
+  //connection: coinbaseWalletConnection,
+  //},
+  //{
+  //src: "/multimedia/wallets/walletconnect.png",
+  //title: "Wallet Connect",
+  //value: "walletconnect",
+  //connection: walletConnectConnection,
+  //},
 ];
 
 export const decodeWithIfaces = (

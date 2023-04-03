@@ -124,7 +124,6 @@ export const onUpdateError = createAction(
 export const onShowTransaction = createAction(
   actionTypes.SHOW_TRANSACTION,
   (transactionInfo: TransactionMeta | boolean) => {
-    console.log({transactionInfo});
     return {
       payload: transactionInfo,
     };

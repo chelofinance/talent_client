@@ -134,8 +134,7 @@ type MiniDaoProposal = {
     description: string;
     image: string;
     metadata: {
-      firstName: string;
-      lastName: string;
+      name: string;
       wallet: string;
       questions: {question: string; answer: string}[];
     };
