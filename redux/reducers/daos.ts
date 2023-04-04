@@ -43,7 +43,7 @@ export const daoReducer = createReducer(dao_state, (builder) => {
                 round.proposals.some((prop) => prop.id === proposalId.toString())
             );
 
-            if (dao && dao.rounds) {
+            if (dao && round) {
                 const proposal = round.proposals.find((prop) => prop.id === proposalId.toString());
                 if (proposal) {
                     if (support == 1) {

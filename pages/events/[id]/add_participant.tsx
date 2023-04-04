@@ -124,15 +124,18 @@ const AddParticipant = () => {
   };
 
   const isDataTooLarge = async (data: ProposalInfo[]) => {
-    const signer = provider.getSigner();
-    const transaction = createBatchProposal(data);
-    const gasLimit = calculateGasMargin(await signer.estimateGas(transaction));
+    try {
+      const signer = provider.getSigner();
+      const transaction = createBatchProposal(data);
+      const gasLimit = calculateGasMargin(await signer.estimateGas(transaction));
 
-    const block = await getLatestBlock(chainId as SupportedNetworks);
-    const blockGasLimit = block.gasLimit;
-    console.log({gasLimit, blockGasLimit});
-
-    return gasLimit.gt(blockGasLimit.mul(70).div(100));
+      const block = await getLatestBlock(chainId as SupportedNetworks);
+      const blockGasLimit = block.gasLimit;
+      return gasLimit.gt(blockGasLimit.mul(70).div(100));
+    } catch (err) {
+      console.log("isDataTooLarge", err);
+      return false;
+    }
   };
 
   const findOptimalBatchSize = async (array: ProposalInfo[]) => {
@@ -150,104 +153,110 @@ const AddParticipant = () => {
     return batchSize;
   };
 
-  const onImportSubmit = () => {
-    console.log("ON import");
+  const onImportSubmit = async () => {
     setUploading(true);
-    console.log("set loading");
     try {
-      Papa.parse(membersInfo, {
-        complete: async (results) => {
-          const headers: string[] = results.data[0];
-          const data: string[][] = results.data.slice(1);
-
-          const mappedData = data.map((row) => {
-            return row.reduce((acc, value, index) => {
-              const columnName = headers[index];
-              acc[columnName] = value;
-              return acc;
-            }, {} as Record<string, string>);
+      const parseCSV = (file: File): Promise<{data: string[][]}> => {
+        return new Promise((resolve, reject) => {
+          Papa.parse(file, {
+            complete: (results) => {
+              resolve(results);
+            },
+            error: (err) => {
+              reject(err);
+            },
           });
+        });
+      };
+      const results = await parseCSV(membersInfo);
+      const headers: string[] = results.data[0];
+      const data: string[][] = results.data.slice(1);
 
-          const questionedData = data.map((row, i) => {
-            const user = mappedData[i];
-            const name = user[`What's your name?`] || "Anonymous";
-            const questions = row.reduce((acc, value, index) => {
-              const question = headers[index];
-              acc.push({question, answer: value});
-              return acc;
-            }, []);
-
-            if (!user["wallet"] && isProduction()) throw Error("no_wallet");
-
-            return {
-              title: "Add member to Talent DAO",
-              description: `Member is ${user[`What's your name?`]}`,
-              image: "",
-              metadata: {
-                name,
-                wallet: isProduction() ? user["wallet"] : user["wallet"] || account,
-                questions,
-              },
-            } as MiniDaoProposal["metadata"];
-          });
-
-          console.log("pasred");
-          const tokenContract = attach("ERC20", dao.token.address);
-          const cids = await uploadUsersData(questionedData);
-          console.log({questionedData, cids, data});
-
-          const proposalsArray: ProposalInfo[] = cids.map((cid, i) => {
-            const calldata = tokenContract.interface.encodeFunctionData("mint", [
-              questionedData[i].metadata.wallet,
-              10,
-            ]);
-
-            return {
-              targets: [dao.token.address],
-              values: [0],
-              calldatas: [calldata],
-              description: cid,
-              roundId: eventId as string,
-            };
-          });
-
-          const batchSize = await findOptimalBatchSize(proposalsArray);
-          let txs: CheloTransactionRequest[] = [];
-
-          for (let i = 0; i < proposalsArray.length; i += batchSize) {
-            const batch = proposalsArray.slice(i, i + batchSize);
-            const {targets, values, calldatas, descriptions} = batch.reduce(
-              (acc, cur) => {
-                return {
-                  targets: acc.targets.concat([cur.targets]),
-                  values: acc.values.concat([cur.values]),
-                  calldatas: acc.calldatas.concat([cur.calldatas]),
-                  descriptions: acc.descriptions.concat([cur.description]),
-                };
-              },
-              {targets: [], values: [], calldatas: [], descriptions: []} as {
-                targets: string[][];
-                values: number[][];
-                calldatas: string[][];
-                descriptions: string[];
-              }
-            );
-
-            txs = txs.concat({
-              to: dao.id,
-              signature: "batchPropose(address[][],uint256[][],bytes[][],string[])",
-              args: [targets, values, calldatas, descriptions],
-            });
-          }
-
-          dispatch(
-            onShowTransaction({
-              txs,
-              type: "wallet",
-            })
-          );
-        },
+      const mappedData = data.map((row) => {
+        return row.reduce((acc, value, index) => {
+          const columnName = headers[index];
+          acc[columnName] = value;
+          return acc;
+        }, {} as Record<string, string>);
       });
+
+      const questionedData = data.map((row, i) => {
+        const user = mappedData[i];
+        const name = user[`What's your name?`] || "Anonymous";
+        const questions = row.reduce((acc, value, index) => {
+          const question = headers[index];
+          acc.push({question, answer: value});
+          return acc;
+        }, []);
+
+        if (!user["wallet"] && isProduction()) throw Error("no_wallet");
+
+        return {
+          title: "Add member to Talent DAO",
+          description: `Member is ${user[`What's your name?`]}`,
+          image: "",
+          metadata: {
+            name,
+            wallet: isProduction() ? user["wallet"] : user["wallet"] || account,
+            questions,
+          },
+        } as MiniDaoProposal["metadata"];
+      });
+
+      const tokenContract = attach("ERC20", dao.token.address);
+      const cids = await uploadUsersData(questionedData);
+
+      const proposalsArray: ProposalInfo[] = cids.map((cid, i) => {
+        const calldata = tokenContract.interface.encodeFunctionData("mint", [
+          questionedData[i].metadata.wallet,
+          10,
+        ]);
+
+        return {
+          targets: [dao.token.address],
+          values: [0],
+          calldatas: [calldata],
+          description: cid,
+          roundId: eventId as string,
+        };
+      });
+
+      const batchSize = await findOptimalBatchSize(proposalsArray);
+      console.log({batchSize});
+      let txs: CheloTransactionRequest[] = [];
+
+      for (let i = 0; i < proposalsArray.length; i += batchSize) {
+        const batch = proposalsArray.slice(i, i + batchSize);
+        const {targets, values, calldatas, descriptions} = batch.reduce(
+          (acc, cur) => {
+            return {
+              targets: acc.targets.concat([cur.targets]),
+              values: acc.values.concat([cur.values]),
+              calldatas: acc.calldatas.concat([cur.calldatas]),
+              descriptions: acc.descriptions.concat([cur.description]),
+            };
+          },
+          {targets: [], values: [], calldatas: [], descriptions: []} as {
+            targets: string[][];
+            values: number[][];
+            calldatas: string[][];
+            descriptions: string[];
+          }
+        );
+
+        txs = txs.concat({
+          to: dao.id,
+          signature: "batchPropose(address[][],uint256[][],bytes[][],string[],uint256)",
+          args: [targets, values, calldatas, descriptions, eventId],
+        });
+      }
+
+      dispatch(
+        onShowTransaction({
+          txs,
+          type: "wallet",
+        })
+      );
     } catch (err) {
       console.log("File proposals", err);
     }
@@ -268,22 +277,26 @@ const AddParticipant = () => {
       },
     };
     const cid = await uploadJson(data);
+    const token = attach("ERC20", dao.token.address);
 
     try {
       dispatch(
         onShowTransaction({
           txs: [
             {
-              to: dao.token.address,
-              signature: "mint(address,uint256)",
-              args: [values.wallet, 1], //TODO calculate mint amount
+              to: dao.id,
+              signature: "proposeWithRound(address[],uint256[],bytes[],string,uint256)",
+              args: [
+                [token.address],
+                [0],
+                [token.interface.encodeFunctionData("mint", [values.wallet, 1])], //TODO calculate mint amount
+                cid,
+                eventId,
+              ],
             },
           ],
           dao: dao.id,
-          type: "chelo",
-          metadata: {
-            cid,
-          },
+          type: "wallet",
         })
       );
     } catch (err) {
@@ -355,31 +368,29 @@ const AddParticipant = () => {
                 <div className="border-b border-gray-200 pb-2 w-full flex justify-center">
                   <span className="text-violet-500 font-semibold text-lg">Add Candidate List</span>
                 </div>
-                <div className="flex w-full">
-                  <div className="flex flex-col w-1/2">
-                    <div className="px-5 flex flex-col w-full px-20 pt-5">
-                      <div className="mb-4">
-                        <span className="text-violet-500">Details</span>
-                      </div>
-                      <Formik
-                        onSubmit={handleNormalSubmit}
-                        initialValues={{
-                          name: "",
-                          wallet: "",
-                          image: null,
-                        }}
-                        validationSchema={Yup.lazy((values: FormValues) => {
-                          return Yup.object({
-                            name: Yup.string().required("Principal required"),
-                            wallet: (
-                              Yup.string().required("User wallet required") as any
-                            ).isEthAddress(),
-                          });
-                        })}
-                      >
-                        {({errors, ...props}) => {
-                          return (
-                            <Form className="flex flex-col justify-between w-full">
+                <Formik
+                  onSubmit={handleNormalSubmit}
+                  initialValues={{
+                    name: "",
+                    wallet: "",
+                    image: null,
+                  }}
+                  validationSchema={Yup.lazy((values: FormValues) => {
+                    return Yup.object({
+                      name: Yup.string().required("Principal required"),
+                      wallet: (Yup.string().required("User wallet required") as any).isEthAddress(),
+                    });
+                  })}
+                >
+                  {({errors, ...props}) => {
+                    return (
+                      <Form className="flex flex-col justify-between w-full">
+                        <div className="flex w-full">
+                          <div className="flex flex-col w-1/2">
+                            <div className="px-5 flex flex-col w-full px-20 pt-5">
+                              <div className="mb-4">
+                                <span className="text-violet-500">Details</span>
+                              </div>
                               <TextInput
                                 white
                                 name="name"
@@ -392,76 +403,78 @@ const AddParticipant = () => {
                                 classes={{root: "w-full"}}
                                 placeholder="Wallet Address"
                               />
-                              {
-                                //<ImageUpload
-                                //text="User photo (optional)"
-                                //classes={{root: "w-full mt-5"}}
-                                //value={props.values.image}
-                                //onChange={(file) => props.setFieldValue("image", file)}
-                                ///>
-                              }
-                            </Form>
-                          );
-                        }}
-                      </Formik>
-                    </div>
-                  </div>
-                  <div className="w-1/2 flex flex-col pt-3">
-                    <div className="w-full flex items-center ml-5 text-violet-500">
-                      <span className="">Questions and Answers</span>
-                      <IconButton onClick={addQuestion} color="inherit" size="small">
-                        <AddIcon />
-                      </IconButton>
-                    </div>
-                    <div className="flex flex-col w-full overflow-scroll max-h-64">
-                      {questions.map(({question, answer}, index) => (
-                        <Accordion
-                          key={index}
-                          sx={{
-                            boxShadow: "none",
-                            background: "transparent",
-                            padding: "0",
-                          }}
-                        >
-                          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                            <TextInput
-                              noFormik
-                              white
-                              value={question}
-                              onChange={(e) => updateQuestion(index, "question", e.target.value)}
-                              classes={{root: "w-full"}}
-                              placeholder="Question"
-                            />
-                            <IconButton onClick={() => deleteQuestion(index)} color="secondary">
-                              <DeleteIcon />
-                            </IconButton>
-                          </AccordionSummary>
-                          <AccordionDetails>
-                            <TextInput
-                              noFormik
-                              white
-                              value={answer}
-                              onChange={(e) => updateQuestion(index, "answer", e.target.value)}
-                              classes={{root: "w-full mt-1 pl-6 pr-10"}}
-                              placeholder="Answer"
-                            />
-                          </AccordionDetails>
-                        </Accordion>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex justify-between w-full items-center px-5 pt-5">
-                  <Button
-                    className="w-72 bg-violet-500 text-sm text-white rounded-full font-semibold p-2"
-                    type="submit"
-                  >
-                    {uploading ? "Uploading..." : "Save"}
-                  </Button>
-                  <Button className="text-sm text-violet-500 font-semibold" onClick={toggleView}>
-                    Use cvs
-                  </Button>
-                </div>
+                            </div>
+                          </div>
+                          <div className="w-1/2 flex flex-col pt-3">
+                            <div className="w-full flex items-center ml-5 text-violet-500">
+                              <span className="">Questions and Answers</span>
+                              <IconButton onClick={addQuestion} color="inherit" size="small">
+                                <AddIcon />
+                              </IconButton>
+                            </div>
+                            <div className="flex flex-col w-full overflow-scroll max-h-64">
+                              {questions.map(({question, answer}, index) => (
+                                <Accordion
+                                  key={index}
+                                  sx={{
+                                    boxShadow: "none",
+                                    background: "transparent",
+                                    padding: "0",
+                                  }}
+                                >
+                                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                                    <TextInput
+                                      noFormik
+                                      white
+                                      value={question}
+                                      onChange={(e) =>
+                                        updateQuestion(index, "question", e.target.value)
+                                      }
+                                      classes={{root: "w-full"}}
+                                      placeholder="Question"
+                                    />
+                                    <IconButton
+                                      onClick={() => deleteQuestion(index)}
+                                      color="secondary"
+                                    >
+                                      <DeleteIcon />
+                                    </IconButton>
+                                  </AccordionSummary>
+                                  <AccordionDetails>
+                                    <TextInput
+                                      noFormik
+                                      white
+                                      value={answer}
+                                      onChange={(e) =>
+                                        updateQuestion(index, "answer", e.target.value)
+                                      }
+                                      classes={{root: "w-full mt-1 pl-6 pr-10"}}
+                                      placeholder="Answer"
+                                    />
+                                  </AccordionDetails>
+                                </Accordion>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex justify-between w-full items-center px-5 pt-5">
+                          <Button
+                            className="w-72 bg-violet-500 text-sm text-white rounded-full font-semibold p-2"
+                            type="submit"
+                          >
+                            {uploading ? "Uploading..." : "Save"}
+                          </Button>
+                          <Button
+                            className="text-sm text-violet-500 font-semibold"
+                            onClick={toggleView}
+                          >
+                            Use cvs
+                          </Button>
+                        </div>
+                      </Form>
+                    );
+                  }}
+                </Formik>
               </div>
             </Card>
           )}

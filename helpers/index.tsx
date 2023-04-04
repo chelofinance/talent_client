@@ -1,4 +1,4 @@
-import {ethers, BigNumber, Contract} from "ethers";
+import { ethers, BigNumber, Contract } from "ethers";
 import {
   JsonRpcProvider,
   Networkish,
@@ -6,8 +6,8 @@ import {
   Web3Provider,
 } from "@ethersproject/providers";
 import Web3 from "web3";
-import {getNetworkConfig} from "./network";
-import {LogDescription} from "@ethersproject/abi";
+import { getNetworkConfig } from "./network";
+import { LogDescription } from "@ethersproject/abi";
 
 export const isProduction = () => process.env.NEXT_PUBLIC_PRODUCTION === "true";
 
@@ -32,14 +32,14 @@ export const getLogs = (contract: Contract, transaction: TransactionReceipt) => 
 };
 
 export const getLatestBlock = async (networkId: SupportedNetworks) => {
-  const {provider} = getNetworkConfig(networkId);
+  const { provider } = getNetworkConfig(networkId);
   const ethersProvider = getProvider(provider);
   return await ethersProvider.getBlock("latest");
 };
 
-export const getBlock = async (args: {networkId: SupportedNetworks; blocknumber: number}) => {
-  const {networkId, blocknumber} = args;
-  const {provider} = getNetworkConfig(networkId);
+export const getBlock = async (args: { networkId: SupportedNetworks; blocknumber: number }) => {
+  const { networkId, blocknumber } = args;
+  const { provider } = getNetworkConfig(networkId);
   const ethersProvider = getProvider(provider);
   return await ethersProvider.getBlock(blocknumber);
 };
@@ -53,6 +53,13 @@ export const getProvider = (
   return new ethers.providers.JsonRpcProvider(provider, options);
 };
 
+export const getNetworkProvider = (
+  networkId: SupportedNetworks
+): JsonRpcProvider | Web3Provider => {
+  const { provider } = getNetworkConfig(networkId);
+  return getProvider(provider);
+};
+
 export const calculateGasMargin = (value: BigNumber): BigNumber => {
   return value.mul(120).div(100);
 };
@@ -64,7 +71,7 @@ export const switchNetwork = async (chainId: number) => {
   if ((window.ethereum as any).networkVersion !== chainId)
     await (window.ethereum as any).request({
       method: "wallet_switchEthereumChain",
-      params: [{chainId: `0x${chainId.toString(16)}`}],
+      params: [{ chainId: `0x${chainId.toString(16)}` }],
     });
 };
 
@@ -76,7 +83,7 @@ export const addNetwork = async ({
 }: {
   chainId: number;
   name: string;
-  currency: {name: string; decimals: number; symbol: string};
+  currency: { name: string; decimals: number; symbol: string };
   rpcUrl: string;
 }) => {
   await (window.ethereum as any).request({

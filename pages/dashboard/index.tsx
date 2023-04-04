@@ -53,27 +53,30 @@ const Dashboard = () => {
             <ArrowBackIos />
           </IconButton>
         )}
-        <div className="flex flex-wrap justify-center items-center w-full overflow-scroll pt-4 pb-4 h-full h-full">
+        <div
+          className="flex flex-wrap justify-center items-center w-full overflow-scroll pt-4 pb-4 h-full h-full"
+          style={{height: "500px"}}
+        >
           {daos.length > 0 ? (
             visibleRounds.map((round) => (
               <Card
                 className={`p-4 rounded-2xl max-w-md ${round.finished && "opacity-75 bg-gray-200"
-                  } mx-2`}
+                  } mx-2 h-full flex-1 flex flex-col justify-between`}
               >
-                <div className="w-full flex justify-center mb-5">
-                  <img
-                    src={round.metadata.image}
-                    alt="ETH"
-                    width={300}
-                    height={100}
-                    className={`rounded-xl ${round.metadata.image === "/multimedia/chelo/logo_black.png"
-                        ? "opacity-75"
-                        : ""
-                      }`}
-                  />
+                <div className="flex flex-col">
+                  <div className="w-full flex justify-center mb-5 h-72 relative flex items-center">
+                    <img
+                      src={round.metadata.image}
+                      alt="ETH"
+                      className={`rounded-xl ${round.metadata.image === "/multimedia/chelo/logo_black.png"
+                          ? "opacity-75"
+                          : ""
+                        } w-full max-h-72 object-cover object-center`}
+                    />
+                  </div>
+                  <span className="text-violet-500 font-bold">{round.metadata.title}</span>
+                  <p className="mb-4">{round.metadata.description}</p>
                 </div>
-                <span className="text-violet-500 font-bold">{round.metadata.title}</span>
-                <p className="mb-4">{round.metadata.description}</p>
                 <Button
                   className="w-full p-4 bg-violet-500 text-white rounded-xl font-bold"
                   onClick={onSelectEvent(round.id)}

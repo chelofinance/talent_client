@@ -39,7 +39,6 @@ const ConnectionComponent: React.FunctionComponent<{
     }
   };
 
-  console.log({disabled});
   return (
     <button
       className={`${!disabled && "hover:scale-125"} ${disabled && "opacity-75"} ${isActive && "border-b-2 border-violet-500"

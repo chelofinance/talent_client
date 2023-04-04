@@ -126,7 +126,6 @@ export const getUserCheloDAOs = async (args: {
       rounds: fullRounds.map((round) => {
         const roundProposals = proposals.filter((prop) => prop.roundId === round.id);
         const finished = curBlock.number > Number(round.endBlock.toString());
-        console.log({finished, curBlock: curBlock.number, round: round.endBlock});
         return {
           ...round,
           id: parseInt(round.id.split("/")[1], 16).toString(),

@@ -29,40 +29,48 @@ const CreateEvent = () => {
 
   const handleNormalSubmit = async (values: FormValues) => {
     setUploading(true);
-    const imageCid = await upload([values.image]);
-    const numOfBlocksToWait = calculateTimeInBlocks({
-      dateStart: values.startTime,
-      dateEnd: values.endTime,
-    });
-    const data: ProposalRound["metadata"] = {
-      title: values.name,
-      description: values.description,
-      image: imageCid,
-      metadata: {
-        startDate: values.startTime.getTime(),
-        endDate: values.endTime.getTime(),
-        location: values.location,
-      },
-    };
-    const dataCid = await uploadJson(data);
-    const dao = daos[daos.length - 1] as MiniDAO;
-
-    dispatch(
-      onShowTransaction({
-        txs: [
-          {
-            to: dao.id,
-            signature: "createRound(string,uint256,uint64)",
-            args: [dataCid, 3, numOfBlocksToWait], //TODO calculate mint amount
-          },
-        ],
-        dao: dao.id,
-        type: "wallet",
+    try {
+      console.log("UPLOAD");
+      const imageCid = `${await upload([values.image])}/${values.image.name}`;
+      console.log({imageCid});
+      const numOfBlocksToWait = calculateTimeInBlocks({
+        dateStart: values.startTime,
+        dateEnd: values.endTime,
+      });
+      console.log({numOfBlocksToWait});
+      const data: ProposalRound["metadata"] = {
+        title: values.name,
+        description: values.description,
+        image: imageCid,
         metadata: {
-          cid: dataCid,
+          startDate: values.startTime.getTime(),
+          endDate: values.endTime.getTime(),
+          location: values.location,
         },
-      })
-    );
+      };
+      const dataCid = await uploadJson(data);
+      console.log({dataCid});
+      const dao = daos[daos.length - 1] as MiniDAO;
+
+      dispatch(
+        onShowTransaction({
+          txs: [
+            {
+              to: dao.id,
+              signature: "createRound(string,uint256,uint64)",
+              args: [dataCid, 3, numOfBlocksToWait], //TODO calculate mint amount
+            },
+          ],
+          dao: dao.id,
+          type: "wallet",
+          metadata: {
+            cid: dataCid,
+          },
+        })
+      );
+    } catch (err) {
+      console.log("ERROR", err);
+    }
     setUploading(false);
   };
 
@@ -88,8 +96,12 @@ const CreateEvent = () => {
                 validationSchema={Yup.object({
                   name: Yup.string().required("Name required"),
                   location: Yup.string().required("Location required"),
-                  startTime: Yup.date().required("Start time required"),
-                  endTime: Yup.date().required("End time required"),
+                  startTime: Yup.date()
+                    .min(new Date(), "Start time must be in the future")
+                    .required("Start time required"),
+                  endTime: Yup.date()
+                    .min(Yup.ref("startTime"), "End time must be later than start time")
+                    .required("End time required"),
                   description: Yup.string().required("Description required"),
                   image: Yup.mixed().required("Image required"),
                 })}

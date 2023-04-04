@@ -35,27 +35,23 @@ const Event = () => {
       <div className="flex flex-col items-center w-full overflow-scroll pt-4 pb-4 h-full">
         <div className="w-full mb-20 flex justify-center gap-5">
           <Card
-            className={`p-4 max-w-4xl bg-neutral-50 text-black rounded-3xl border border-gray-200 shadow-md max-h-fit`}
+            className={`w-2/3 p-4 max-w-4xl bg-neutral-50 text-black rounded-3xl border border-gray-200 shadow-md `}
             custom
           >
             <div className="w-full flex justify-center rounded-2xl mb-5 w-full max-h-96 overflow-hidden">
-              {event?.metadata.image === "/multimedia/chelo/logo_black.png" ? (
-                <div className="h-max-96 flex justify-center">
-                  <img src={event?.metadata.image} alt="Event" className="h-full opacity-75" />
-                </div>
-              ) : (
+              <div className="w-full flex justify-center mb-5 h-72 relative flex items-center h-max-96">
                 <img
-                  src={event?.metadata.image}
-                  alt="Event"
-                  className="w-full object-none"
-                  style={{height: "auto"}}
+                  src={event.metadata.image}
+                  alt="ETH"
+                  className={`rounded-xl ${event.metadata.image === "/multimedia/chelo/logo_black.png" ? "opacity-75" : ""
+                    } w-full max-h-72 object-cover object-center`}
                 />
-              )}
+              </div>
             </div>
             <div className="mb-4">
               <span className="text-violet-500 font-bold text-2xl">{event?.metadata.title}</span>
             </div>
-            <div className="flex justify-between items-center mb-10">
+            <div className="flex justify-between items-start mb-10">
               <div className="flex gap-3 items-center w-1/2">
                 <span className="text-violet-500">
                   <CalendarMonthIcon fontSize="medium" color="inherit" />
@@ -117,7 +113,7 @@ const Event = () => {
             )}
           </Card>
           {!isFinished && proposals.length > 0 && (
-            <div className="w-full flex flex-col ">
+            <div className="w-1/3 flex flex-col ">
               <h2 className="text-violet-500 text-xl mb-4">Leaderboard</h2>
               <NewcomersList proposals={proposals} />
             </div>
@@ -142,37 +138,39 @@ const NewcomersList: React.FunctionComponent<{proposals: MiniDaoProposal[]}> = (
   };
 
   return (
-    <Card className="px-12 py-10 pt-0 w-full max-h-[40rem] overflow-y-scroll bg-neutral-50 text-black rounded-3xl border border-gray-200 shadow-md">
-      {proposals.length === 0 ? (
-        <p className="text-gray-500">There are no participants</p>
-      ) : (
-        proposals.map(({metadata, votesYes}, i) => (
-          <div
-            key={i}
-            className={"mt-8 hover:bg-gray-100 cursor-pointer"}
-            onClick={handleClick(String(i))}
-          >
-            <AvatarElement
-              badge={true}
-              address={metadata?.metadata.wallet}
-              count={Number(votesYes)}
-              infoComponent={
-                <div className="flex flex-col">
-                  <p className="text-md font-semibold whitespace-nowrap">
-                    {metadata?.metadata.name}
-                  </p>
-                  <p className="text-xs text-gray-600">{metadata?.metadata.name}</p>
-                </div>
-              }
-              badgeContent={
-                <div className="w-6 h-6 rounded-full bg-violet-500 text-white font-semibold flex items-center justify-center">
-                  {votesYes}
-                </div>
-              }
-            />
-          </div>
-        ))
-      )}
+    <Card className="py-10 pt-0 w-full bg-neutral-50 text-black rounded-3xl border border-gray-200 shadow-md">
+      <div className="overflow-y-scroll max-h-[40rem] px-12 ">
+        {proposals.length === 0 ? (
+          <p className="text-gray-500">There are no participants</p>
+        ) : (
+          proposals.map(({metadata, votesYes}, i) => (
+            <div
+              key={i}
+              className={"mt-8 hover:bg-gray-100 cursor-pointer"}
+              onClick={handleClick(String(i))}
+            >
+              <AvatarElement
+                badge={true}
+                address={metadata?.metadata.wallet}
+                count={Number(votesYes)}
+                infoComponent={
+                  <div className="flex flex-col">
+                    <p className="text-md font-semibold whitespace-nowrap">
+                      {metadata?.metadata.name}
+                    </p>
+                    <p className="text-xs text-gray-600">{metadata?.metadata.name}</p>
+                  </div>
+                }
+                badgeContent={
+                  <div className="w-6 h-6 rounded-full bg-violet-500 text-white font-semibold flex items-center justify-center">
+                    {votesYes}
+                  </div>
+                }
+              />
+            </div>
+          ))
+        )}
+      </div>
       <Link href={`/events/${router.query.id}/leaderboard`}>
         <span className="text-violet-500 text-md mt-4 block w-full text-center cursor-pointer">
           View all rankings

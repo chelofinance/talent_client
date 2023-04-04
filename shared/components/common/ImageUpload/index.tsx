@@ -37,7 +37,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({value, onChange, classes, text
   return (
     <DropzoneContainer onClick={openFileDialog} className={classes?.root}>
       <Typography variant="body1">
-        {value ? "Image selected" : text || "Click or drag and drop an image"}
+        {value ? value.name : text || "Click or drag and drop an image"}
       </Typography>
     </DropzoneContainer>
   );

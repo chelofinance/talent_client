@@ -14,6 +14,8 @@ import { useDaos, useProposals } from "@shared/hooks/daos";
 import { useAppDispatch } from "@redux/store";
 import { onShowTransaction } from "@redux/actions";
 import { useWeb3React } from "@web3-react/core";
+import { attach } from "@helpers/contracts";
+import { getNetworkProvider, getProvider } from "@helpers/index";
 
 const Accordion = styled(MuiAccordion)(({ theme }) => ({
   backgroundColor: "#f1f2f4",
@@ -39,30 +41,48 @@ const AccordionSummary = styled(MuiAccordionSummary)(() => ({
 const Event = () => {
   const router = useRouter();
   const { daos } = useDaos();
-  const { account } = useWeb3React();
+  const { account, chainId } = useWeb3React();
   const { proposals } = useProposals(router.query.id as string);
 
   const dispatch = useAppDispatch();
   const proposal = proposals[Number(router.query.userId)];
   const isFinished = false;
+  const email =
+    proposal?.metadata?.metadata.questions.find((q) => q.question.toLowerCase().includes("email"))
+      ?.answer || "N/A";
+  const twitter =
+    proposal?.metadata?.metadata.questions.find((q) => q.question.toLowerCase().includes("twitter"))
+      ?.answer || "N/A";
+  const telegram =
+    proposal?.metadata?.metadata.questions.find((q) =>
+      q.question.toLowerCase().includes("telegram")
+    )?.answer || "N/A";
 
-  const handleVoteYes = () => {
+  const handleVoteYes = async () => {
+    const provider = getNetworkProvider(chainId as SupportedNetworks);
     const dao = daos[daos.length - 1] as MiniDAO;
+    const token = attach("ERC20Votes", dao.token.address, provider);
+    const delegatee = await token.delegates(account);
+    const castVoteTx = {
+      to: dao.id,
+      signature: "castVote(uint256,uint8)",
+      args: [proposal.proposalId, 1],
+    };
+    const txs =
+      delegatee.toLowerCase() === account.toLowerCase()
+        ? [castVoteTx]
+        : [
+            {
+              to: dao.token.address,
+              signature: "delegate(address)",
+              args: [account],
+            },
+            castVoteTx,
+          ];
 
     dispatch(
       onShowTransaction({
-        txs: [
-          {
-            to: dao.token.address,
-            signature: "delegate(address)",
-            args: [account],
-          },
-          {
-            to: dao.id,
-            signature: "castVote(uint256,uint8)",
-            args: [proposal.proposalId, 1],
-          },
-        ],
+        txs,
         type: "wallet",
         dao: dao.id,
       })
@@ -71,7 +91,7 @@ const Event = () => {
 
   return (
     <>
-      <div className="flex flex-col items-center w-full overflow-scroll pt-20 pb-4 h-full">
+      <div className="flex flex-col items-center w-full overflow-scroll pt-5 pb-4 h-full">
         <div className="w-full mb-20 flex justify-center gap-5">
           {!isFinished && (
             <div className="1/2">
@@ -93,9 +113,9 @@ const Event = () => {
                       <p className="text-lg font-semibold ">{proposal?.metadata?.metadata.name}</p>
                       <p className="text-gray-500 ml-2 text-sm">(Alumni)</p>
                     </div>
-                    <p className="text-xs">Identity: Male</p>
-                    <p className="text-xs">Ethnicity: Latino</p>
-                    <p className="text-xs">Nationality: Canada</p>
+                    <p className="text-xs">Email: {email}</p>
+                    <p className="text-xs">Twitter: {twitter}</p>
+                    <p className="text-xs">Telegram: {telegram}</p>
                   </div>
                 }
               />
@@ -106,7 +126,7 @@ const Event = () => {
                 Vote
               </Button>
             </div>
-            <div className="mb-10 mt-8">
+            <div className="mb-10 mt-8 overflow-scroll" style={{ maxHeight: "500px" }}>
               {proposal?.metadata?.metadata.questions.map((q, index) => (
                 <Accordion key={index}>
                   <AccordionSummary
@@ -117,7 +137,7 @@ const Event = () => {
                     <Typography>{q.question}</Typography>
                   </AccordionSummary>
                   <AccordionDetails>
-                    <Typography>{q.answer}</Typography>
+                    <Typography>{q.answer || "N/A"}</Typography>
                   </AccordionDetails>
                 </Accordion>
               ))}
@@ -171,26 +191,30 @@ const NewcomersList: React.FunctionComponent<{}> = (props) => {
       <div className="p-4 border-b border-gray-200 flex justify-center">
         <span className="text-violet-500 font-semibold">Candidates</span>
       </div>
-      {proposals.map(({ metadata, votesYes }, i) => (
-        <div className={"mt-8 hover:bg-gray-100 px-8"} onClick={handleClick(String(i))}>
-          <AvatarElement
-            address={metadata?.metadata.wallet}
-            badge={true}
-            count={Number(votesYes)}
-            infoComponent={
-              <div className="flex flex-col">
-                <p className="text-md font-semibold whitespace-nowrap">{metadata?.metadata.name}</p>
-                <p className="text-xs text-gray-600">{metadata?.metadata.name}</p>
-              </div>
-            }
-            badgeContent={
-              <div className="w-6 h-6 rounded-full bg-violet-500 text-white font-semibold flex items-center justify-center">
-                {votesYes}
-              </div>
-            }
-          />
-        </div>
-      ))}
+      <div className="overflow-scroll" style={{ maxHeight: "600px" }}>
+        {proposals.map(({ metadata, votesYes }, i) => (
+          <div className={"mt-8 hover:bg-gray-100 px-8"} onClick={handleClick(String(i))}>
+            <AvatarElement
+              address={metadata?.metadata.wallet}
+              badge={true}
+              count={Number(votesYes)}
+              infoComponent={
+                <div className="flex flex-col">
+                  <p className="text-md font-semibold whitespace-nowrap">
+                    {metadata?.metadata.name}
+                  </p>
+                  <p className="text-xs text-gray-600">{metadata?.metadata.name}</p>
+                </div>
+              }
+              badgeContent={
+                <div className="w-6 h-6 rounded-full bg-violet-500 text-white font-semibold flex items-center justify-center">
+                  {votesYes}
+                </div>
+              }
+            />
+          </div>
+        ))}
+      </div>
     </Card>
   );
 };

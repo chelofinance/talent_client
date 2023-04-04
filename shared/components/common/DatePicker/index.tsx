@@ -28,7 +28,7 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
       value={finalValue}
       onChange={changeFn}
       renderInput={({inputRef, inputProps, InputProps}) => (
-        <>
+        <div className="flex flex-col">
           <div
             className={clsx(
               `border-1 border-gray-400 rounded-full bg-white border-orange p-1 appearance-none border overflow-hidden `,
@@ -45,8 +45,8 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
             />
             {InputProps.endAdornment}
           </div>
-          {errors[name] && <span className={`text-red-300 text-sm`}>{errors[name]}</span>}
-        </>
+          {errors[name] && <span className={`text-red-300 text-sm pb-2`}>{errors[name]}</span>}
+        </div>
       )}
     />
   );
