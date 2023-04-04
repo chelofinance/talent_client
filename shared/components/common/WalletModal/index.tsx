@@ -6,8 +6,10 @@ import {WALLETS} from "@helpers/connection/utils";
 import {Connection} from "@helpers/connection";
 import {networkConfigs} from "@helpers/network";
 import {useAppDispatch, useAppSelector} from "@redux/store";
-import {onSwitchNetwork} from "@redux/actions";
+import {onConnectWallet, onSwitchNetwork} from "@redux/actions";
 import {useWeb3React} from "@web3-react/core";
+import {useRouter} from "next/router";
+import {isAddress} from "ethers/lib/utils";
 
 interface WalletModalProps {
   showModal: boolean;
@@ -23,26 +25,41 @@ const NETWORKS = Object.entries(
 const ConnectionComponent: React.FunctionComponent<{
   connection: Connection;
   onSelect?: Function;
+  network: SupportedNetworks;
   src: string;
   title: string;
   disabled: boolean;
 }> = (props) => {
-  const {isActive} = useWeb3React();
-  const {connection, onSelect, src, title, disabled} = props;
+  const {connection, onSelect, src, title, disabled, network} = props;
+  const {account, isActive} = useWeb3React();
+  const dispatch = useAppDispatch();
+  const router = useRouter();
 
   const handleConnection = async () => {
     try {
       await connection.connector.activate();
+      await dispatch(onSwitchNetwork({networkId: network, connector: connection.connector}));
       onSelect && onSelect();
     } catch (err) {
       console.log({err});
     }
   };
 
+  React.useEffect(() => {
+    if (!isAddress(account) || !isActive) return;
+    dispatch(
+      onConnectWallet({
+        connection: connection.connector,
+        chainId: network,
+        account,
+      })
+    );
+    router.push("/dashboard");
+  }, [account, isActive]);
+
   return (
     <button
-      className={`${!disabled && "hover:scale-125"} ${disabled && "opacity-75"} ${isActive && "border-b-2 border-violet-500"
-        }`}
+      className={`${!disabled && "hover:scale-125"} ${disabled && "opacity-75"} `}
       onClick={handleConnection}
       disabled={disabled}
     >
@@ -56,25 +73,14 @@ export const WalletModal: React.FunctionComponent<WalletModalProps> = ({
   showModal,
   setShowModal,
 }) => {
-  const dispatch = useAppDispatch();
   const {
     account: {networkId},
   } = useAppSelector((state) => state.user);
-  const {connector, isActive} = useWeb3React();
   const [selectedNetwork, setSelectedNetwork] = React.useState<SupportedNetworks>(null);
 
   const handleConnect = async () => {
-    try {
-      await dispatch(onSwitchNetwork({networkId: selectedNetwork, connector}));
-      setShowModal("loading");
-    } catch (err) {
-      console.log({err});
-    }
+    setShowModal("loading");
   };
-
-  React.useEffect(() => {
-    if (isActive && !networkId) handleConnect();
-  }, [isActive, networkId]);
 
   return (
     <Modal
@@ -119,6 +125,7 @@ export const WalletModal: React.FunctionComponent<WalletModalProps> = ({
                     title={k.title}
                     connection={k.connection}
                     disabled={selectedNetwork === null}
+                    network={selectedNetwork}
                   />
                 ))}
               </div>
