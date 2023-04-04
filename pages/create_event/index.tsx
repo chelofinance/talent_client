@@ -15,7 +15,6 @@ import {calculateTimeInBlocks} from "@helpers/contracts";
 type FormValues = {
   name: string;
   location: string;
-  startTime: Date;
   endTime: Date;
   description: string;
   image: File | null;
@@ -30,27 +29,24 @@ const CreateEvent = () => {
   const handleNormalSubmit = async (values: FormValues) => {
     setUploading(true);
     try {
-      console.log("UPLOAD");
       const imageCid = `${await upload([values.image])}/${values.image.name}`;
-      console.log({imageCid});
       const numOfBlocksToWait = calculateTimeInBlocks({
-        dateStart: values.startTime,
+        dateStart: new Date(),
         dateEnd: values.endTime,
       });
-      console.log({numOfBlocksToWait});
       const data: ProposalRound["metadata"] = {
         title: values.name,
         description: values.description,
         image: imageCid,
         metadata: {
-          startDate: values.startTime.getTime(),
+          startDate: new Date().getTime(),
           endDate: values.endTime.getTime(),
           location: values.location,
         },
       };
       const dataCid = await uploadJson(data);
-      console.log({dataCid});
       const dao = daos[daos.length - 1] as MiniDAO;
+      console.log({numOfBlocksToWait});
 
       dispatch(
         onShowTransaction({
@@ -88,7 +84,6 @@ const CreateEvent = () => {
                 initialValues={{
                   name: "",
                   location: "",
-                  startTime: new Date(),
                   endTime: new Date(),
                   description: "",
                   image: null,
@@ -96,12 +91,9 @@ const CreateEvent = () => {
                 validationSchema={Yup.object({
                   name: Yup.string().required("Name required"),
                   location: Yup.string().required("Location required"),
-                  startTime: Yup.date()
+                  endTime: Yup.date()
                     .min(new Date(), "Start time must be in the future")
                     .required("Start time required"),
-                  endTime: Yup.date()
-                    .min(Yup.ref("startTime"), "End time must be later than start time")
-                    .required("End time required"),
                   description: Yup.string().required("Description required"),
                   image: Yup.mixed().required("Image required"),
                 })}
@@ -116,7 +108,6 @@ const CreateEvent = () => {
                           classes={{root: "w-1/4 mb-4"}}
                           placeholder="Name"
                         />
-                        <DateTimePicker label="Start Date and Time" name="startTime" />
                         <DateTimePicker name="endTime" label="End Date and Time" />
                       </div>
                       <TextInput
