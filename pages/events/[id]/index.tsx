@@ -41,9 +41,9 @@ const Event = () => {
             <div className="w-full flex justify-center rounded-2xl mb-5 w-full max-h-96 overflow-hidden">
               <div className="w-full flex justify-center mb-5 h-72 relative flex items-center h-max-96">
                 <img
-                  src={event.metadata.image}
+                  src={event?.metadata.image}
                   alt="ETH"
-                  className={`rounded-xl ${event.metadata.image === "/multimedia/chelo/logo_black.png" ? "opacity-75" : ""
+                  className={`rounded-xl ${event?.metadata.image === "/multimedia/chelo/logo_black.png" ? "opacity-75" : ""
                     } w-full max-h-72 object-cover object-center`}
                 />
               </div>

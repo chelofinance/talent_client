@@ -55,7 +55,7 @@ const Dashboard = () => {
         )}
         <div
           className="flex flex-wrap justify-center items-center w-full overflow-scroll pt-4 pb-4 h-full h-full"
-          style={{height: "500px"}}
+          style={{minHeight: "500px"}}
         >
           {daos.length > 0 ? (
             visibleRounds.map((round) => (

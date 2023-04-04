@@ -88,7 +88,7 @@ const AddParticipant = () => {
     accept: "text/csv",
     maxFiles: 1,
     onDrop: (acceptedFiles) => setMembersInfo(acceptedFiles[0]),
-  });
+  } as any);
 
   const dao = daos[daos.length - 1] as MiniDAO;
   const eventId = router.query.id;
