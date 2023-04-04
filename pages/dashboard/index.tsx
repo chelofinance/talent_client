@@ -62,6 +62,7 @@ const Dashboard = () => {
               <Card
                 className={`p-4 rounded-2xl max-w-md ${round.finished && "opacity-75 bg-gray-200"
                   } mx-2 h-full flex-1 flex flex-col justify-between`}
+                style={{height: "600px"}}
               >
                 <div className="flex flex-col">
                   <div className="w-full flex justify-center mb-5 h-72 relative flex items-center">
@@ -75,13 +76,15 @@ const Dashboard = () => {
                     />
                   </div>
                   <span className="text-violet-500 font-bold">{round.metadata.title}</span>
-                  <p className="mb-4">{round.metadata.description}</p>
+                  <p className="mb-4 h-[9em] overflow-hidden line-clamp-3">
+                    {round.metadata.description}
+                  </p>
                 </div>
                 <Button
                   className="w-full p-4 bg-violet-500 text-white rounded-xl font-bold"
                   onClick={onSelectEvent(round.id)}
                 >
-                  View
+                  {round.finished ? "Finished" : "View"}
                 </Button>
               </Card>
             ))

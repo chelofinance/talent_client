@@ -23,7 +23,12 @@ import {ArrowForwardIosSharp} from "@mui/icons-material";
 import {attach} from "@helpers/contracts";
 import {parseCheloTransaction} from "@helpers/chelo";
 import {TransactionRequest} from "@ethersproject/providers";
-import {calculateGasMargin, getLatestBlock, isProduction} from "@helpers/index";
+import {
+  calculateGasMargin,
+  getLatestBlock,
+  getNetworkProvider,
+  isProduction,
+} from "@helpers/index";
 import {useWeb3React} from "@web3-react/core";
 import {ethers} from "ethers";
 
@@ -153,6 +158,24 @@ const AddParticipant = () => {
     return batchSize;
   };
 
+  const buildTxs = async (mainTx: CheloTransactionRequest[]) => {
+    const token = attach(
+      "ERC20Votes",
+      dao.token.address,
+      getNetworkProvider(chainId as SupportedNetworks)
+    );
+    console.log("delegates");
+    const delegatee = await token.delegates(account);
+    console.log("delegates", delegatee);
+    const delegateTx = {
+      to: dao.token.address,
+      signature: "delegate(address)",
+      args: [account],
+    };
+
+    return delegatee.toLowerCase() === account.toLowerCase() ? mainTx : [delegateTx, ...mainTx];
+  };
+
   const onImportSubmit = async () => {
     setUploading(true);
     try {
@@ -253,7 +276,7 @@ const AddParticipant = () => {
 
       dispatch(
         onShowTransaction({
-          txs,
+          txs: await buildTxs(txs),
           type: "wallet",
         })
       );
@@ -263,8 +286,7 @@ const AddParticipant = () => {
     setUploading(false);
   };
 
-  const handleNormalSubmit = async (values: FormValues) => {
-    setUploading(true);
+  const dataCid = async (values: FormValues) => {
     const imageCid = values.image ? await upload([values.image]) : "";
     const data: MiniDaoProposal["metadata"] = {
       title: "Add member to Talent DAO",
@@ -276,25 +298,33 @@ const AddParticipant = () => {
         questions,
       },
     };
-    const cid = await uploadJson(data);
-    const token = attach("ERC20", dao.token.address);
+    return await uploadJson(data);
+  };
+
+  const handleNormalSubmit = async (values: FormValues) => {
+    setUploading(true);
+    const cid = await dataCid(values);
+    console.log({cid});
+    const token = attach("ERC20Votes", dao.token.address);
+    const txs = await buildTxs([
+      {
+        to: dao.id,
+        signature: "proposeWithRound(address[],uint256[],bytes[],string,uint256)",
+        args: [
+          [token.address],
+          [0],
+          [token.interface.encodeFunctionData("mint", [values.wallet, 1])], //TODO calculate mint amount
+          cid,
+          eventId,
+        ],
+      },
+    ]);
+    console.log({txs});
 
     try {
       dispatch(
         onShowTransaction({
-          txs: [
-            {
-              to: dao.id,
-              signature: "proposeWithRound(address[],uint256[],bytes[],string,uint256)",
-              args: [
-                [token.address],
-                [0],
-                [token.interface.encodeFunctionData("mint", [values.wallet, 1])], //TODO calculate mint amount
-                cid,
-                eventId,
-              ],
-            },
-          ],
+          txs,
           dao: dao.id,
           type: "wallet",
         })
