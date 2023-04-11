@@ -87,9 +87,10 @@ export const onSwitchNetwork = createAsyncThunk<
 
       return {network: networkId};
     } catch (err) {
+      console.log({err});
       const network = getNetworkConfig(networkId);
       try {
-        if (err.code === 4902 || err.code === -32603) {
+        if (err.code === 4902) {
           await addNetwork({
             chainId: networkId,
             name: network.settings.name,
@@ -101,6 +102,12 @@ export const onSwitchNetwork = createAsyncThunk<
             rpcUrl: network.settings.explorer,
           });
           return {network: networkId};
+        } else if (err.code === -32603) {
+          return rejectWithValue({
+            message: `Seems like we can't switch network automatically. Please check if you can change it from the wallet`,
+            code: err.code,
+            open: true,
+          } as StateErrorType);
         }
       } catch (err) {
         console.log({onConnectWallet: err});
