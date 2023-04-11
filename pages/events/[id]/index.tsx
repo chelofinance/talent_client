@@ -17,8 +17,7 @@ const Event = () => {
   const {proposals, round} = useProposals(router.query.id as string);
   const winners = [...proposals]
     .sort((a, b) => Number(b.votesYes) - Number(a.votesYes))
-    .slice(0, round.executeThreshold);
-  console.log({winners, round});
+    .slice(0, round?.executeThreshold || 0);
 
   const event = daos[0]?.rounds.find((round) => round.id === router.query.id);
   const isFinished = event?.finished;

@@ -27,7 +27,7 @@ export class MiniDaoController implements DaoController {
       wallet: dao.wallet,
       type: "chelo",
       isRoot: true,
-      token: {address: ""},
+      token: {address: "", decimals: 6},
       votesLength: "",
       votingDelay: "",
       votingPeriod: "",
