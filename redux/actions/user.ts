@@ -89,7 +89,7 @@ export const onSwitchNetwork = createAsyncThunk<
     } catch (err) {
       const network = getNetworkConfig(networkId);
       try {
-        if (err.code === 4902) {
+        if (err.code === 4902 || err.code === -32603) {
           await addNetwork({
             chainId: networkId,
             name: network.settings.name,

@@ -143,7 +143,7 @@ type MiniDaoProposal = {
 };
 
 interface MiniDAO extends DAO {
-  token: {address: string};
+  token: {address: string; decimals: number};
   votesLength: string;
   votingDelay: string;
   votingPeriod: string;

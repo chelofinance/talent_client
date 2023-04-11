@@ -7,6 +7,7 @@ import Spiner from "@shared/components/common/Spiner";
 import {useDaos} from "@shared/hooks/daos";
 import Card from "@shared/components/common/Card";
 import {Button} from "@shared/components/common/Forms";
+import Link from "next/link";
 
 const Dashboard = () => {
   const {daos, loaded} = useDaos();
@@ -45,7 +46,7 @@ const Dashboard = () => {
   return (
     <>
       <div className="flex justify-center items-center min-h-96">
-        {loaded && (
+        {loaded && visibleRounds.length > 0 && (
           <IconButton
             onClick={handlePrevPage}
             className="text-violet-500 hover:text-violet-700 transform hover:scale-110"
@@ -57,7 +58,7 @@ const Dashboard = () => {
           className="flex flex-wrap justify-center items-center w-full overflow-scroll pt-4 pb-4 h-full h-full"
           style={{minHeight: "500px"}}
         >
-          {daos.length > 0 ? (
+          {daos.length > 0 && visibleRounds.length > 0 ? (
             visibleRounds.map((round) => (
               <Card
                 className={`p-4 rounded-2xl max-w-md ${round.finished && "opacity-75 bg-gray-200"
@@ -89,8 +90,11 @@ const Dashboard = () => {
               </Card>
             ))
           ) : loaded ? (
-            <div className="w-full h-full flex justify-center items-center">
-              <span className="text-xl">There are no DAOs to show</span>
+            <div className="w-full h-full flex flex-col justify-center items-center">
+              <span className="text-xl">There are no events to show</span>
+              <Link href="/create_event">
+                <p className="text-xl cursor-pointer text-violet-500">Create event</p>
+              </Link>
             </div>
           ) : (
             <div className="w-full h-96 flex justify-center items-center text-violet-500">
@@ -98,7 +102,7 @@ const Dashboard = () => {
             </div>
           )}
         </div>
-        {loaded && (
+        {loaded && visibleRounds.length > 0 && (
           <IconButton
             onClick={handleNextPage}
             className="text-violet-500 hover:text-violet-700 transform hover:scale-110"

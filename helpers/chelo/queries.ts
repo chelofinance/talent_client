@@ -10,91 +10,90 @@ export const GET_ACCOUNT = graphql(/* GraphQL */ `
 `);
 
 export const GET_ALL_GIVEN_OWNER = /* GraphQL */ gql`
-  query GovernorsForOwner($id: ID!) {
+  query Governors {
     proposalRounds {
       id
       endBlock
       description
       startBlock
+      executeThreshold
     }
-    account(id: $id) {
-      ownerOf {
+    governors {
+      id
+      name
+      votingDelay
+      votingPeriod
+      quorum
+      token {
         id
-        name
-        votingDelay
-        votingPeriod
-        quorum
-        token {
-          id
-          asERC20 {
-            name
-            symbol
-            decimals
-            asAccount {
-              id
-            }
-            totalSupply {
-              value
-            }
-            balances {
-              account {
-                id
-              }
-              value
-              valueExact
-            }
+        asERC20 {
+          name
+          symbol
+          decimals
+          asAccount {
+            id
           }
-          asERC721 {
-            asAccount {
+          totalSupply {
+            value
+          }
+          balances {
+            account {
               id
             }
-            supportsMetadata
-            name
-            symbol
-            tokens {
-              owner {
-                id
-              }
-              identifier
-              uri
-            }
+            value
+            valueExact
           }
         }
-        proposals {
-          proposalId
-          startBlock
-          endBlock
-          description
-          canceled
-          queued
-          executed
-          calls {
-            calldata
-            value
-            target {
+        asERC721 {
+          asAccount {
+            id
+          }
+          supportsMetadata
+          name
+          symbol
+          tokens {
+            owner {
               id
             }
+            identifier
+            uri
           }
-          round {
+        }
+      }
+      proposals {
+        proposalId
+        startBlock
+        endBlock
+        description
+        canceled
+        queued
+        executed
+        calls {
+          calldata
+          value
+          target {
             id
           }
-          proposer {
+        }
+        round {
+          id
+        }
+        proposer {
+          id
+        }
+        votecast {
+          id
+          voter {
             id
           }
-          votecast {
-            id
-            voter {
-              id
+          receipt {
+            reason
+            weight
+            support {
+              support
             }
-            receipt {
-              reason
-              weight
-              support {
-                support
-              }
-            }
-            timestamp
           }
+          timestamp
         }
       }
     }

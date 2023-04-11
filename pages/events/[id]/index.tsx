@@ -8,11 +8,17 @@ import Card from "@shared/components/common/Card";
 import AvatarElement from "@shared/components/common/AvatarElement";
 import {Button} from "@shared/components/common/Forms";
 import {useDaos, useProposals} from "@shared/hooks/daos";
+import {prettifyNumber} from "@helpers/erc";
+import {toBN} from "@helpers/index";
 
 const Event = () => {
   const {daos, loaded} = useDaos();
   const router = useRouter();
-  const {proposals} = useProposals(router.query.id as string);
+  const {proposals, round} = useProposals(router.query.id as string);
+  const winners = [...proposals]
+    .sort((a, b) => Number(b.votesYes) - Number(a.votesYes))
+    .slice(0, round.executeThreshold);
+  console.log({winners, round});
 
   const event = daos[0]?.rounds.find((round) => round.id === router.query.id);
   const isFinished = event?.finished;
@@ -88,8 +94,8 @@ const Event = () => {
             {isFinished && (
               <div>
                 <span className="text-violet-500 font-bold text-xl">Candidate Winners</span>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10 my-5 mx-10 justify-center">
-                  {proposals.map(({metadata}, i) => (
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10 my-5 mx-0 justify-center">
+                  {winners.map(({metadata}, i) => (
                     <div
                       key={i}
                       className={"hover:bg-gray-100 cursor-pointer"}
@@ -127,6 +133,9 @@ const Event = () => {
 const NewcomersList: React.FunctionComponent<{proposals: MiniDaoProposal[]}> = (props) => {
   const {proposals} = props;
   const router = useRouter();
+  const {daos} = useDaos();
+  const decimals = daos.length > 0 ? daos[0].token.decimals : 6;
+  const sortedProposals = [...proposals].sort((a, b) => Number(b.votesYes) - Number(a.votesYes));
 
   const handleClick = (userIndex: string) => () => {
     router.push({
@@ -143,7 +152,7 @@ const NewcomersList: React.FunctionComponent<{proposals: MiniDaoProposal[]}> = (
         {proposals.length === 0 ? (
           <p className="text-gray-500">There are no participants</p>
         ) : (
-          proposals.map(({metadata, votesYes}, i) => (
+          sortedProposals.map(({metadata, votesYes}, i) => (
             <div
               key={i}
               className={"mt-8 hover:bg-gray-100 cursor-pointer"}
@@ -152,7 +161,7 @@ const NewcomersList: React.FunctionComponent<{proposals: MiniDaoProposal[]}> = (
               <AvatarElement
                 badge={true}
                 address={metadata?.metadata.wallet}
-                count={Number(votesYes)}
+                count={prettifyNumber(toBN(votesYes).div(toBN(10).pow(decimals)))}
                 infoComponent={
                   <div className="flex flex-col">
                     <p className="text-md font-semibold whitespace-nowrap">
@@ -162,8 +171,8 @@ const NewcomersList: React.FunctionComponent<{proposals: MiniDaoProposal[]}> = (
                   </div>
                 }
                 badgeContent={
-                  <div className="w-6 h-6 rounded-full bg-violet-500 text-white font-semibold flex items-center justify-center">
-                    {votesYes}
+                  <div className="w-8 h-8 rounded-full bg-violet-500 text-white font-semibold flex items-center justify-center text-xs">
+                    {prettifyNumber(toBN(votesYes).div(toBN(10).pow(decimals)))}
                   </div>
                 }
               />

@@ -15,14 +15,13 @@ import Papa from "papaparse";
 
 import Card from "@shared/components/common/Card";
 import {Button, TextInput} from "@shared/components/common/Forms";
-import {useAppDispatch} from "@redux/store";
-import {onShowTransaction} from "@redux/actions";
+import {useAppDispatch, useAppSelector} from "@redux/store";
+import {onShowTransaction, onUpdateError} from "@redux/actions";
 import {useDaos} from "@shared/hooks/daos";
 import {upload, uploadJson} from "@helpers/chelo";
 import {ArrowForwardIosSharp} from "@mui/icons-material";
 import {attach} from "@helpers/contracts";
 import {parseCheloTransaction} from "@helpers/chelo";
-import {TransactionRequest} from "@ethersproject/providers";
 import {
   calculateGasMargin,
   getLatestBlock,
@@ -30,7 +29,7 @@ import {
   isProduction,
 } from "@helpers/index";
 import {useWeb3React} from "@web3-react/core";
-import {ethers} from "ethers";
+import {Contract, ethers} from "ethers";
 
 const Accordion = styled((props: AccordionProps) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -86,6 +85,9 @@ const AddParticipant = () => {
   const [view, setView] = React.useState("ICL");
 
   const router = useRouter();
+  const {
+    account: {networkId},
+  } = useAppSelector((state) => state.user);
   const {daos, loaded} = useDaos();
   const dispatch = useAppDispatch();
   const {provider, chainId, account} = useWeb3React();
@@ -139,7 +141,7 @@ const AddParticipant = () => {
       return gasLimit.gt(blockGasLimit.mul(70).div(100));
     } catch (err) {
       console.log("isDataTooLarge", err);
-      return false;
+      return true;
     }
   };
 
@@ -147,7 +149,7 @@ const AddParticipant = () => {
     let batchSize = array.length;
     let isTooLarge = true;
 
-    while (isTooLarge) {
+    while (isTooLarge && batchSize > 80) {
       const batch = array.slice(0, batchSize);
       isTooLarge = await isDataTooLarge(batch);
       if (isTooLarge) {
@@ -158,22 +160,14 @@ const AddParticipant = () => {
     return batchSize;
   };
 
-  const buildTxs = async (mainTx: CheloTransactionRequest[]) => {
-    const token = attach(
-      "ERC20Votes",
-      dao.token.address,
-      getNetworkProvider(chainId as SupportedNetworks)
-    );
-    console.log("delegates");
-    const delegatee = await token.delegates(account);
-    console.log("delegates", delegatee);
-    const delegateTx = {
-      to: dao.token.address,
-      signature: "delegate(address)",
-      args: [account],
-    };
+  const calculateMintAmount = async (token: Contract) => {
+    const totalSupply = await token.totalSupply();
+    const group = await token.groups(2);
 
-    return delegatee.toLowerCase() === account.toLowerCase() ? mainTx : [delegateTx, ...mainTx];
+    return totalSupply
+      .div(100)
+      .mul(group.power)
+      .div(group.mints || dao.members.length);
   };
 
   const onImportSubmit = async () => {
@@ -193,7 +187,7 @@ const AddParticipant = () => {
       };
       const results = await parseCSV(membersInfo);
       const headers: string[] = results.data[0];
-      const data: string[][] = results.data.slice(1);
+      const data: string[][] = results.data.slice(1).filter((cur) => cur.length === headers.length);
 
       const mappedData = data.map((row) => {
         return row.reduce((acc, value, index) => {
@@ -205,18 +199,16 @@ const AddParticipant = () => {
 
       const questionedData = data.map((row, i) => {
         const user = mappedData[i];
-        const name = user[`What's your name?`] || "Anonymous";
+        const name = user[`What's your name?`] || user["Name"] || "Anonymous";
         const questions = row.reduce((acc, value, index) => {
           const question = headers[index];
           acc.push({question, answer: value});
           return acc;
         }, []);
 
-        if (!user["wallet"] && isProduction()) throw Error("no_wallet");
-
         return {
           title: "Add member to Talent DAO",
-          description: `Member is ${user[`What's your name?`]}`,
+          description: `Member is ${name}`,
           image: "",
           metadata: {
             name,
@@ -226,26 +218,43 @@ const AddParticipant = () => {
         } as MiniDaoProposal["metadata"];
       });
 
-      const tokenContract = attach("ERC20", dao.token.address);
+      if (questionedData.some((user) => !ethers.utils.isAddress(user.metadata.wallet))) {
+        const index = questionedData.findIndex(
+          (user) => !ethers.utils.isAddress(user.metadata.wallet)
+        );
+        console.log({index, data: data[index - 1]});
+        dispatch(onUpdateError({code: "WALLET_REQUIRED_CSV", message: "", open: true}));
+        throw Error("Users wallet");
+      }
+
+      const tokenContract = attach(
+        "ElasticVotes",
+        dao.token.address,
+        getNetworkProvider(networkId)
+      );
       const cids = await uploadUsersData(questionedData);
+      const mintAmount = await calculateMintAmount(tokenContract);
 
       const proposalsArray: ProposalInfo[] = cids.map((cid, i) => {
-        const calldata = tokenContract.interface.encodeFunctionData("mint", [
+        const addGroupCalldata = tokenContract.interface.encodeFunctionData("addToGroup", [
           questionedData[i].metadata.wallet,
-          10,
+          2,
+        ]);
+        const mintCalldata = tokenContract.interface.encodeFunctionData("mint", [
+          questionedData[i].metadata.wallet,
+          mintAmount,
         ]);
 
         return {
-          targets: [dao.token.address],
-          values: [0],
-          calldatas: [calldata],
+          targets: [dao.token.address, dao.token.address],
+          values: [0, 0],
+          calldatas: [addGroupCalldata, mintCalldata],
           description: cid,
           roundId: eventId as string,
         };
       });
 
       const batchSize = await findOptimalBatchSize(proposalsArray);
-      console.log({batchSize});
       let txs: CheloTransactionRequest[] = [];
 
       for (let i = 0; i < proposalsArray.length; i += batchSize) {
@@ -276,7 +285,7 @@ const AddParticipant = () => {
 
       dispatch(
         onShowTransaction({
-          txs: await buildTxs(txs),
+          txs,
           type: "wallet",
         })
       );
@@ -303,25 +312,29 @@ const AddParticipant = () => {
 
   const handleNormalSubmit = async (values: FormValues) => {
     setUploading(true);
-    const cid = await dataCid(values);
-    console.log({cid});
-    const token = attach("ERC20Votes", dao.token.address);
-    const txs = await buildTxs([
-      {
-        to: dao.id,
-        signature: "proposeWithRound(address[],uint256[],bytes[],string,uint256)",
-        args: [
-          [token.address],
-          [0],
-          [token.interface.encodeFunctionData("mint", [values.wallet, 1])], //TODO calculate mint amount
-          cid,
-          eventId,
-        ],
-      },
-    ]);
-    console.log({txs});
 
     try {
+      const cid = await dataCid(values);
+      const token = attach("ElasticVotes", dao.token.address, getNetworkProvider(networkId));
+      const mintAmount = await calculateMintAmount(token);
+
+      const txs = [
+        {
+          to: dao.id,
+          signature: "proposeWithRound(address[],uint256[],bytes[],string,uint256)",
+          args: [
+            [token.address, token.address],
+            [0, 0],
+            [
+              token.interface.encodeFunctionData("addToGroup", [values.wallet, 2]),
+              token.interface.encodeFunctionData("mint", [values.wallet, mintAmount]),
+            ],
+            cid,
+            eventId,
+          ],
+        },
+      ];
+
       dispatch(
         onShowTransaction({
           txs,
@@ -352,7 +365,6 @@ const AddParticipant = () => {
     setQuestions(questions.filter((_, i) => i !== index));
   };
 
-  console.log({uploading});
   return (
     <>
       <div className="flex flex-col items-center w-full pt-20 pb-4 h-full">
@@ -373,7 +385,7 @@ const AddParticipant = () => {
                     >
                       <input {...getInputProps()} />
                       <p className="text-violet-500">
-                        <AddIcon />
+                        {membersInfo ? `${membersInfo.name} selected` : <AddIcon />}
                       </p>
                     </div>
                     <Button

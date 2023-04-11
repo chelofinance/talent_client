@@ -103,11 +103,8 @@ export const networkConfigs: Record<NetworkName, NetworkConfig> = {
       erc1155: "0x8aCa04Aa2e97f5C26604ce18b3772963fBbdF184",
     },
     endpoints: {
-      chelo: "https://api.thegraph.com/subgraphs/name/rcontre360/chelo_treasury_polygon",
+      chelo: "https://api.thegraph.com/subgraphs/name/rcontre360/talent_subgraph_production",
       explorer: `https://api.polygonscan.com/api?apikey=${process.env.NEXT_PUBLIC_POLYGOSCAN_KEY}`,
-      chelo_aragon: "https://api.thegraph.com/subgraphs/name/rcontre360/chelo_aragon_polygon",
-      syndicate: "https://subgraph.satsuma-prod.com/syndicate/polygon/api",
-      aragon: null,
     },
     settings: {
       chainId: 137,

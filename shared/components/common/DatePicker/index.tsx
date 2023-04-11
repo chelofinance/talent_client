@@ -7,6 +7,7 @@ import clsx from "clsx";
 type DateTimePickerProps = {
   noFormik?: boolean;
   label: string;
+  placeholder?: string;
   name?: string;
   value?: Date;
   onChange?: (date: Date) => void;
@@ -15,6 +16,7 @@ type DateTimePickerProps = {
 export const DateTimePicker: React.FC<DateTimePickerProps> = ({
   label,
   value,
+  placeholder,
   onChange,
   name,
   noFormik,
@@ -38,6 +40,7 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
             <input
               {...inputProps}
               ref={inputRef}
+              placeholder={placeholder || inputProps.placeholder}
               className={clsx([
                 " px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline",
                 " w-full py-2",

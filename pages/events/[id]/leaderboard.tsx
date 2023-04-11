@@ -2,13 +2,17 @@ import React from "react";
 import {useRouter} from "next/router";
 import Card from "@shared/components/common/Card";
 import AvatarElement from "@shared/components/common/AvatarElement";
-import {useProposals} from "@shared/hooks/daos";
+import {useDaos, useProposals} from "@shared/hooks/daos";
 import ThumbUpOffAltIcon from "@mui/icons-material/ThumbUpOffAlt";
+import {prettifyNumber} from "@helpers/erc";
+import {toBN} from "@helpers/index";
 
 const Leaderboard: React.FunctionComponent = () => {
   const router = useRouter();
+  const {daos} = useDaos();
   const {proposals: prop} = useProposals(router.query.id as string);
   const proposals = [...prop];
+  const decimals = daos.length > 0 ? daos[0].token.decimals : 6;
 
   const sortedProposals = proposals.sort((a, b) => Number(b.votesYes) - Number(a.votesYes));
 
@@ -55,7 +59,7 @@ const Leaderboard: React.FunctionComponent = () => {
                 </div>
               </div>
               <div className={"flex gap-2 font-semibold ml-5"}>
-                <span>{votesYes}</span>
+                <span>{prettifyNumber(toBN(votesYes).div(toBN(10).pow(decimals)))}</span>
                 <ThumbUpOffAltIcon fontSize="medium" color="action" />
               </div>
             </div>

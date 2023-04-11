@@ -7,6 +7,7 @@ import {onUpdateError} from "@redux/actions";
 const ErrorCodeMessages = {
   ACTION_REJECTED: "User rejected wallet action",
   UNPREDICTABLE_GAS_LIMIT: "Transaction may fail or may require manual gas limit",
+  WALLET_REQUIRED_CSV: "Invalid user. All users must have a wallet",
 };
 
 interface ErrorCardProps {
@@ -30,19 +31,19 @@ export const ErrorCard: React.FunctionComponent<ErrorCardProps> = (props) => {
 
   return (
     <div
-      className={clsx("p-3 m-3 bg-red-400 text-white rounded-md flex flex-col", classes?.root)}
+      className={clsx("p-3 m-3 bg-red-200 text-white rounded-md flex flex-col", classes?.root)}
       style={{zIndex: "1000"}}
     >
       <div className="w-full flex justify-between mb-2">
         <div className="flex items-center">
           <ExclamationCircleIcon width={20} className="m-0 text-red-700 mr-2" />
-          <span className="text-red-700 font-bold ">Error</span>
+          <span className="text-red-600 font-bold ">Error</span>
         </div>
         <button onClick={onErrorClose}>
           <XIcon width={15} className="m-0" />
         </button>
       </div>
-      <span className="text-white font-md">{`${errorMessage.charAt(0).toUpperCase() + errorMessage.slice(1)
+      <span className="text-red-600 font-md">{`${errorMessage.charAt(0).toUpperCase() + errorMessage.slice(1)
         }`}</span>
     </div>
   );

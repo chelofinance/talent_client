@@ -5,7 +5,7 @@ import Modal from "@shared/components/common/Modal";
 import {WALLETS} from "@helpers/connection/utils";
 import {Connection} from "@helpers/connection";
 import {networkConfigs} from "@helpers/network";
-import {useAppDispatch, useAppSelector} from "@redux/store";
+import {useAppDispatch} from "@redux/store";
 import {onConnectWallet, onSwitchNetwork} from "@redux/actions";
 import {useWeb3React} from "@web3-react/core";
 import {useRouter} from "next/router";
@@ -14,24 +14,22 @@ import {isAddress} from "ethers/lib/utils";
 interface WalletModalProps {
   showModal: boolean;
   setShowModal: (nxt: "show" | "hide" | "loading") => void;
-  onSelect?: Function;
 }
 
-const {hardhat, ...productionConfigs} = networkConfigs;
+const {hardhat, ethereum, goerli, mumbai, ...productionConfigs} = networkConfigs;
 const NETWORKS = Object.entries(
   process.env.NEXT_PUBLIC_PRODUCTION === "false" ? networkConfigs : productionConfigs
 );
 
 const ConnectionComponent: React.FunctionComponent<{
   connection: Connection;
-  onSelect?: Function;
   network: SupportedNetworks;
   src: string;
   title: string;
   disabled: boolean;
 }> = (props) => {
-  const {connection, onSelect, src, title, disabled, network} = props;
-  const {account, isActive} = useWeb3React();
+  const {connection, src, title, disabled, network} = props;
+  const {account, isActive, chainId} = useWeb3React();
   const dispatch = useAppDispatch();
   const router = useRouter();
 
@@ -39,14 +37,14 @@ const ConnectionComponent: React.FunctionComponent<{
     try {
       await connection.connector.activate();
       await dispatch(onSwitchNetwork({networkId: network, connector: connection.connector}));
-      onSelect && onSelect();
     } catch (err) {
       console.log({err});
     }
   };
 
   React.useEffect(() => {
-    if (!isAddress(account) || !isActive) return;
+    console.log({isActive, chainId, network});
+    if (!isAddress(account) || !isActive || chainId !== network) return;
     dispatch(
       onConnectWallet({
         connection: connection.connector,
@@ -73,14 +71,7 @@ export const WalletModal: React.FunctionComponent<WalletModalProps> = ({
   showModal,
   setShowModal,
 }) => {
-  const {
-    account: {networkId},
-  } = useAppSelector((state) => state.user);
   const [selectedNetwork, setSelectedNetwork] = React.useState<SupportedNetworks>(null);
-
-  const handleConnect = async () => {
-    setShowModal("loading");
-  };
 
   return (
     <Modal

@@ -4,7 +4,7 @@ import {Web3Storage} from "web3.storage";
 
 import {makeQuery} from "@helpers/connection";
 import {getNetworkConfig} from "@helpers/network";
-import {GovernorsForOwnerQuery} from "__generated__/gql/graphql";
+import {GovernorsQuery} from "__generated__/gql/graphql";
 import {getProvider, hash, toBN} from "..";
 import {GET_ALL_GIVEN_OWNER} from "./queries";
 
@@ -42,13 +42,10 @@ export const getUserCheloDAOs = async (args: {
   const {networkId} = args;
   const {endpoints, provider: rpc} = getNetworkConfig(networkId);
   const provider = getProvider(rpc);
-  const res = await makeQuery<GovernorsForOwnerQuery>(endpoints.chelo, GET_ALL_GIVEN_OWNER, {
-    //id: account,
-    id: "0x17edD5734a7fE8B7c4C262283EA8F2de24449F6c",
-  });
+  const res = await makeQuery<GovernorsQuery>(endpoints.chelo, GET_ALL_GIVEN_OWNER);
   const curBlock = await provider.getBlock("latest");
 
-  const getProposalsInfo = async (governor: GovernorsForOwnerQuery["account"]["ownerOf"][0]) => {
+  const getProposalsInfo = async (governor: GovernorsQuery["governors"][0]) => {
     const proposalsInfo = await Promise.all(
       governor.proposals.map((proposal) => getIpfsProposal(proposal.description))
     );
@@ -60,10 +57,10 @@ export const getUserCheloDAOs = async (args: {
 
   const fullRounds = await Promise.all(res.proposalRounds.map(getRoundInfo));
   const proposalsInfo = (
-    await Promise.all(res.account.ownerOf.map((governor) => getProposalsInfo(governor)))
+    await Promise.all(res.governors.map((governor) => getProposalsInfo(governor)))
   ).reduce((acc, cur) => cur.concat(acc), []);
 
-  return res.account.ownerOf.map((governor) => {
+  return res.governors.map((governor) => {
     const isERC20 = Boolean(governor.token.asERC20);
     const proposals = governor.proposals.map((proposal) => {
       const {yes, no} = proposal.votecast.reduce(
@@ -118,6 +115,7 @@ export const getUserCheloDAOs = async (args: {
         address: isERC20
           ? governor.token.asERC20.asAccount.id
           : governor.token.asERC721.asAccount.id,
+        decimals: governor.token.asERC20.decimals,
       },
       votesLength: governor.proposals.length.toString(),
       votingDelay: governor.votingDelay as string,

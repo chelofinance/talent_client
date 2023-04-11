@@ -46,7 +46,6 @@ const CreateEvent = () => {
       };
       const dataCid = await uploadJson(data);
       const dao = daos[daos.length - 1] as MiniDAO;
-      console.log({numOfBlocksToWait});
 
       dispatch(
         onShowTransaction({
@@ -84,7 +83,7 @@ const CreateEvent = () => {
                 initialValues={{
                   name: "",
                   location: "",
-                  endTime: new Date(),
+                  endTime: null,
                   description: "",
                   image: null,
                 }}
@@ -108,7 +107,11 @@ const CreateEvent = () => {
                           classes={{root: "w-1/4 mb-4"}}
                           placeholder="Name"
                         />
-                        <DateTimePicker name="endTime" label="End Date and Time" />
+                        <DateTimePicker
+                          name="endTime"
+                          label="End Date and Time"
+                          placeholder="End time"
+                        />
                       </div>
                       <TextInput
                         white

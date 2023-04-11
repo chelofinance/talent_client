@@ -4,6 +4,8 @@ import {onGetUserDaos} from "@redux/actions/daos";
 import {useAppDispatch, useAppSelector} from "@redux/store";
 import {useWeb3React} from "@web3-react/core";
 import {onSubscribeEvents} from "@redux/actions";
+import {attach} from "@helpers/contracts";
+import {getNetworkProvider} from "@helpers/index";
 
 export const useDaos = () => {
   const {daos, loaded} = useAppSelector((state) => state.daos);
@@ -36,5 +38,5 @@ export const useProposals = (roundId: string) => {
     //if (!dao.proposals)
   }, [loaded]);
 
-  return {proposals: round?.proposals || [], loaded};
+  return {proposals: round?.proposals || [], loaded, round};
 };

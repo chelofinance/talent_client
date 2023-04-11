@@ -15,7 +15,8 @@ import { useAppDispatch } from "@redux/store";
 import { onShowTransaction } from "@redux/actions";
 import { useWeb3React } from "@web3-react/core";
 import { attach } from "@helpers/contracts";
-import { getNetworkProvider, getProvider } from "@helpers/index";
+import { getNetworkProvider, getProvider, toBN } from "@helpers/index";
+import { prettifyNumber } from "@helpers/erc";
 
 const Accordion = styled(MuiAccordion)(({ theme }) => ({
   backgroundColor: "#f1f2f4",
@@ -59,30 +60,16 @@ const Event = () => {
     )?.answer || "N/A";
 
   const handleVoteYes = async () => {
-    const provider = getNetworkProvider(chainId as SupportedNetworks);
     const dao = daos[daos.length - 1] as MiniDAO;
-    const token = attach("ERC20Votes", dao.token.address, provider);
-    const delegatee = await token.delegates(account);
     const castVoteTx = {
       to: dao.id,
       signature: "castVote(uint256,uint8)",
       args: [proposal.proposalId, 1],
     };
-    const txs =
-      delegatee.toLowerCase() === account.toLowerCase()
-        ? [castVoteTx]
-        : [
-            {
-              to: dao.token.address,
-              signature: "delegate(address)",
-              args: [account],
-            },
-            castVoteTx,
-          ];
 
     dispatch(
       onShowTransaction({
-        txs,
+        txs: [castVoteTx],
         type: "wallet",
         dao: dao.id,
       })
@@ -173,6 +160,8 @@ const Event = () => {
 const NewcomersList: React.FunctionComponent<{}> = (props) => {
   const router = useRouter();
   const { proposals } = useProposals(router.query.id as string);
+  const { daos } = useDaos();
+  const decimals = daos.length > 0 ? daos[0].token.decimals : 6;
 
   const handleClick = (userIndex: string) => () => {
     router.push({
@@ -197,7 +186,7 @@ const NewcomersList: React.FunctionComponent<{}> = (props) => {
             <AvatarElement
               address={metadata?.metadata.wallet}
               badge={true}
-              count={Number(votesYes)}
+              count={prettifyNumber(toBN(votesYes).div(toBN(10).pow(decimals)))}
               infoComponent={
                 <div className="flex flex-col">
                   <p className="text-md font-semibold whitespace-nowrap">
@@ -207,8 +196,8 @@ const NewcomersList: React.FunctionComponent<{}> = (props) => {
                 </div>
               }
               badgeContent={
-                <div className="w-6 h-6 rounded-full bg-violet-500 text-white font-semibold flex items-center justify-center">
-                  {votesYes}
+                <div className="w-8 h-8 rounded-full bg-violet-500 text-white font-semibold flex items-center justify-center text-2xs">
+                  {prettifyNumber(toBN(votesYes).div(toBN(10).pow(decimals)))}
                 </div>
               }
             />

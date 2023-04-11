@@ -1,5 +1,5 @@
 import axios from "axios";
-import {ethers} from "ethers";
+import {BigNumber, ethers} from "ethers";
 import {TokenList} from "@uniswap/token-lists";
 
 import {attach} from "@helpers/contracts";
@@ -92,4 +92,19 @@ export const getNextERC721Enummerable = async (args: {
   const {provider} = getNetworkConfig(networkId);
   const nftContract = attach("ERC721", contract, provider);
   return (await nftContract.tokenOfOwnerByIndex(owner, index)).toString();
+};
+
+export const prettifyNumber = (number: BigNumber) => {
+  const strNumber = number.toString();
+  const units = ["k", "M", "B", "T"];
+  const length = strNumber.length;
+  const unitIndex = Math.floor((length - 1) / 3);
+
+  if (unitIndex === 0) {
+    return strNumber;
+  } else {
+    const integerPart = strNumber.slice(0, length - unitIndex * 3);
+    const decimalPart = strNumber.slice(length - unitIndex * 3, length - unitIndex * 3 + 1);
+    return integerPart + "." + decimalPart + units[unitIndex - 1];
+  }
 };

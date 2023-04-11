@@ -94,9 +94,11 @@ export const onVoteCast = createAction(
     support: number;
     reason: string;
     coreAddress: string;
-  }) => ({
-    payload,
-  })
+  }) => {
+    return {
+      payload,
+    };
+  }
 );
 
 export const onProposalExecuted = createAction(
