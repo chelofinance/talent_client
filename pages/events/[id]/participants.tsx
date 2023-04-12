@@ -47,7 +47,7 @@ const Event = () => {
 
   const dispatch = useAppDispatch();
   const proposal = proposals[Number(router.query.userId)];
-  const hasVoted = proposal.votes.some(
+  const hasVoted = proposal?.votes?.some(
     (vote: ProposalVote) => vote.voter.toLowerCase() === account.toLowerCase()
   );
   const email =
