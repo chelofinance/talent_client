@@ -4,7 +4,7 @@ import {Typography} from "@mui/material";
 
 const DropzoneContainer = styled("div")({
   border: "2px dashed #c4c4c4",
-  borderRadius: "4px",
+  borderRadius: "20px",
   padding: "1rem",
   textAlign: "center",
   cursor: "pointer",
