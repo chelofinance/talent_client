@@ -117,6 +117,11 @@ type ProposalCall = {
   calldata: string;
 };
 
+type ProposalVote = {
+  voter: string;
+  timestamp: number;
+};
+
 type MiniDaoProposal = {
   roundId: string;
   description: string;
@@ -140,6 +145,7 @@ type MiniDaoProposal = {
     };
   };
   calls: ProposalCall[];
+  votes: ProposalVote[];
 };
 
 interface MiniDAO extends DAO {

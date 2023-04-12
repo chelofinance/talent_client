@@ -44,9 +44,10 @@ const Event = () => {
               location={event?.metadata.metadata.location}
               isFinished={isFinished}
               description={event?.metadata.description}
-              winners={winners.map(({metadata}) => ({
+              winners={winners.map(({metadata, executed}) => ({
                 wallet: metadata?.metadata.wallet,
                 name: metadata?.metadata.name,
+                executed: executed,
               }))}
               handleWinnerClick={handleWinnerClick}
             />

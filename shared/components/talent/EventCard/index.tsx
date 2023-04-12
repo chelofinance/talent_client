@@ -18,7 +18,7 @@ interface EventCardProps {
   isFinished: boolean;
   description?: string;
   numberOfWinners?: number;
-  winners?: {wallet: string; name: string}[];
+  winners?: {wallet: string; name: string; executed: boolean}[];
   handleWinnerClick?: (wallet: string) => (event: MouseEvent) => void;
 }
 
@@ -110,11 +110,11 @@ const EventCard: React.FC<EventCardProps> = ({
           <div>
             <span className="text-violet-500 font-bold text-xl">Candidate Winners</span>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10 my-5 mx-0 justify-center">
-              {winners.map(({wallet, name}, i) => (
+              {winners.map(({wallet, name, executed}, i) => (
                 <div
                   key={i}
-                  className={"hover:bg-gray-100 cursor-pointer"}
-                  onClick={handleWinnerClick ? handleWinnerClick(wallet) : undefined}
+                  className={executed ? "" : "hover:bg-gray-100 cursor-pointer"}
+                  onClick={handleWinnerClick && !executed ? handleWinnerClick(wallet) : undefined}
                 >
                   <AvatarElement
                     address={wallet}
@@ -123,7 +123,12 @@ const EventCard: React.FC<EventCardProps> = ({
                         <p className="text-md font-semibold whitespace-nowrap overflow-hidden text-ellipsis w-28">
                           {name}
                         </p>
-                        <p className="text-xs text-gray-600">Alumni</p>
+                        <div className="flex gap-2">
+                          <p className="text-xs text-gray-600">Alumni</p>
+                          {executed && (
+                            <p className="text-xs text-violet-500 font-semibold">Claimed</p>
+                          )}
+                        </div>
                       </div>
                     }
                   />
