@@ -1,39 +1,40 @@
-import React, {useState} from "react";
-import {useRouter} from "next/router";
-import {Form, Formik} from "formik";
+import React, { useState } from "react";
+import { useRouter } from "next/router";
+import { Form, Formik } from "formik";
 import * as Yup from "yup";
 import IconButton from "@mui/material/IconButton";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
-import MuiAccordion, {AccordionProps} from "@mui/material/Accordion";
-import MuiAccordionSummary, {AccordionSummaryProps} from "@mui/material/AccordionSummary";
+import MuiAccordion, { AccordionProps } from "@mui/material/Accordion";
+import MuiAccordionSummary, { AccordionSummaryProps } from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import {styled} from "@mui/material/styles";
-import {useDropzone} from "react-dropzone";
+import { styled } from "@mui/material/styles";
+import { useDropzone } from "react-dropzone";
 import Papa from "papaparse";
 
 import Card from "@shared/components/common/Card";
-import {Button, TextInput} from "@shared/components/common/Forms";
-import {useAppDispatch, useAppSelector} from "@redux/store";
-import {onShowTransaction, onUpdateError} from "@redux/actions";
-import {useDaos} from "@shared/hooks/daos";
-import {upload, uploadJson} from "@helpers/chelo";
-import {ArrowForwardIosSharp} from "@mui/icons-material";
-import {attach} from "@helpers/contracts";
-import {parseCheloTransaction} from "@helpers/chelo";
+import { Button, TextInput } from "@shared/components/common/Forms";
+import { useAppDispatch, useAppSelector } from "@redux/store";
+import { onShowTransaction, onUpdateError } from "@redux/actions";
+import { useDaos } from "@shared/hooks/daos";
+import { upload, uploadJson } from "@helpers/chelo";
+import { ArrowForwardIosSharp } from "@mui/icons-material";
+import { attach } from "@helpers/contracts";
+import { parseCheloTransaction } from "@helpers/chelo";
 import {
   calculateGasMargin,
   getLatestBlock,
   getNetworkProvider,
   isProduction,
+  toBN,
 } from "@helpers/index";
-import {useWeb3React} from "@web3-react/core";
-import {Contract, ethers} from "ethers";
+import { useWeb3React } from "@web3-react/core";
+import { Contract, ethers } from "ethers";
 
 const Accordion = styled((props: AccordionProps) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
-))(({theme}) => ({
+))(({ theme }) => ({
   border: `none`,
   "& .MuiAccordionDetails-root": {
     paddingTop: 9,
@@ -50,10 +51,10 @@ const Accordion = styled((props: AccordionProps) => (
 
 const AccordionSummary = styled((props: AccordionSummaryProps) => (
   <MuiAccordionSummary
-    expandIcon={<ArrowForwardIosSharp sx={{fontSize: "0.9rem"}} />}
+    expandIcon={<ArrowForwardIosSharp sx={{ fontSize: "0.9rem" }} />}
     {...props}
   />
-))(({theme}) => ({
+))(({ theme }) => ({
   background: "transparent",
   flexDirection: "row-reverse",
   "& .MuiAccordionSummary-content": {
@@ -81,17 +82,17 @@ type FormValues = {
 const AddParticipant = () => {
   const [uploading, setUploading] = React.useState(false);
   const [membersInfo, setMembersInfo] = React.useState<File>(null);
-  const [questions, setQuestions] = useState([{question: "", answer: ""}]);
+  const [questions, setQuestions] = useState([{ question: "", answer: "" }]);
   const [view, setView] = React.useState("ICL");
 
   const router = useRouter();
   const {
-    account: {networkId},
+    account: { networkId },
   } = useAppSelector((state) => state.user);
-  const {daos, loaded} = useDaos();
+  const { daos, loaded } = useDaos();
   const dispatch = useAppDispatch();
-  const {provider, chainId, account} = useWeb3React();
-  const {getRootProps, getInputProps} = useDropzone({
+  const { provider, chainId, account } = useWeb3React();
+  const { getRootProps, getInputProps } = useDropzone({
     accept: "text/csv",
     maxFiles: 1,
     onDrop: (acceptedFiles) => setMembersInfo(acceptedFiles[0]),
@@ -105,7 +106,7 @@ const AddParticipant = () => {
   ): Promise<string[]> => {
     const files = proposalMeta.map((object, i) => {
       const jsonString = JSON.stringify(object);
-      const jsonBlob = new Blob([jsonString], {type: "application/json"});
+      const jsonBlob = new Blob([jsonString], { type: "application/json" });
 
       return new File([jsonBlob], `metadata.${i}.json`, {
         type: "application/json",
@@ -120,12 +121,13 @@ const AddParticipant = () => {
   const createBatchProposal = (data: ProposalInfo[]) => {
     return parseCheloTransaction({
       to: dao.id,
-      signature: "batchPropose(address[][],uint256[][],bytes[][],string[])",
+      signature: "batchPropose(address[][],uint256[][],bytes[][],string[], uint256)",
       args: [
-        data.map(({targets}) => targets),
-        data.map(({values}) => values),
-        data.map(({calldatas}) => calldatas),
-        data.map(({description}) => description),
+        data.map(({ targets }) => targets),
+        data.map(({ values }) => values),
+        data.map(({ calldatas }) => calldatas),
+        data.map(({ description }) => description),
+        eventId,
       ],
     });
   };
@@ -153,7 +155,7 @@ const AddParticipant = () => {
       const batch = array.slice(0, batchSize);
       isTooLarge = await isDataTooLarge(batch);
       if (isTooLarge) {
-        batchSize = Math.floor(batchSize / 2);
+        batchSize = Math.floor(batchSize / 2) + (batchSize % 2);
       }
     }
 
@@ -173,7 +175,7 @@ const AddParticipant = () => {
   const onImportSubmit = async () => {
     setUploading(true);
     try {
-      const parseCSV = (file: File): Promise<{data: string[][]}> => {
+      const parseCSV = (file: File): Promise<{ data: string[][] }> => {
         return new Promise((resolve, reject) => {
           Papa.parse(file, {
             complete: (results) => {
@@ -202,7 +204,7 @@ const AddParticipant = () => {
         const name = user[`What's your name?`] || user["Name"] || "Anonymous";
         const questions = row.reduce((acc, value, index) => {
           const question = headers[index];
-          acc.push({question, answer: value});
+          acc.push({ question, answer: value });
           return acc;
         }, []);
 
@@ -222,8 +224,8 @@ const AddParticipant = () => {
         const index = questionedData.findIndex(
           (user) => !ethers.utils.isAddress(user.metadata.wallet)
         );
-        console.log({index, data: data[index - 1]});
-        dispatch(onUpdateError({code: "WALLET_REQUIRED_CSV", message: "", open: true}));
+        console.log({ index, data: data[index - 1] });
+        dispatch(onUpdateError({ code: "WALLET_REQUIRED_CSV", message: "", open: true }));
         throw Error("Users wallet");
       }
 
@@ -259,7 +261,7 @@ const AddParticipant = () => {
 
       for (let i = 0; i < proposalsArray.length; i += batchSize) {
         const batch = proposalsArray.slice(i, i + batchSize);
-        const {targets, values, calldatas, descriptions} = batch.reduce(
+        const { targets, values, calldatas, descriptions } = batch.reduce(
           (acc, cur) => {
             return {
               targets: acc.targets.concat([cur.targets]),
@@ -268,7 +270,7 @@ const AddParticipant = () => {
               descriptions: acc.descriptions.concat([cur.description]),
             };
           },
-          {targets: [], values: [], calldatas: [], descriptions: []} as {
+          { targets: [], values: [], calldatas: [], descriptions: [] } as {
             targets: string[][];
             values: number[][];
             calldatas: string[][];
@@ -353,11 +355,11 @@ const AddParticipant = () => {
   };
 
   const addQuestion = () => {
-    setQuestions([...questions, {question: "", answer: ""}]);
+    setQuestions([...questions, { question: "", answer: "" }]);
   };
 
   const updateQuestion = (index: number, field: keyof typeof questions[0], value: string) => {
-    const updatedQuestions = questions.map((q, i) => (i === index ? {...q, [field]: value} : q));
+    const updatedQuestions = questions.map((q, i) => (i === index ? { ...q, [field]: value } : q));
     setQuestions(updatedQuestions);
   };
 
@@ -370,7 +372,7 @@ const AddParticipant = () => {
       <div className="flex flex-col items-center w-full pt-20 pb-4 h-full">
         <div className="w-full mb-20 flex justify-center gap-5">
           {view === "ICL" && (
-            <Card className="py-5 flex flex-col justify-between" style={{height: "400px"}}>
+            <Card className="py-5 flex flex-col justify-between" style={{ height: "400px" }}>
               <div className="w-full">
                 <div className="border-b border-gray-200 pb-2 w-full flex justify-center">
                   <span className="text-violet-500 font-semibold text-lg">
@@ -424,7 +426,7 @@ const AddParticipant = () => {
                     });
                   })}
                 >
-                  {({errors, ...props}) => {
+                  {({ errors, ...props }) => {
                     return (
                       <Form className="flex flex-col justify-between w-full">
                         <div className="flex w-full">
@@ -436,13 +438,13 @@ const AddParticipant = () => {
                               <TextInput
                                 white
                                 name="name"
-                                classes={{root: "w-full mb-4"}}
+                                classes={{ root: "w-full mb-4" }}
                                 placeholder="First Name"
                               />
                               <TextInput
                                 white
                                 name="wallet"
-                                classes={{root: "w-full"}}
+                                classes={{ root: "w-full" }}
                                 placeholder="Wallet Address"
                               />
                             </div>
@@ -455,7 +457,7 @@ const AddParticipant = () => {
                               </IconButton>
                             </div>
                             <div className="flex flex-col w-full overflow-scroll max-h-64">
-                              {questions.map(({question, answer}, index) => (
+                              {questions.map(({ question, answer }, index) => (
                                 <Accordion
                                   key={index}
                                   sx={{
@@ -472,7 +474,7 @@ const AddParticipant = () => {
                                       onChange={(e) =>
                                         updateQuestion(index, "question", e.target.value)
                                       }
-                                      classes={{root: "w-full"}}
+                                      classes={{ root: "w-full" }}
                                       placeholder="Question"
                                     />
                                     <IconButton
@@ -490,7 +492,7 @@ const AddParticipant = () => {
                                       onChange={(e) =>
                                         updateQuestion(index, "answer", e.target.value)
                                       }
-                                      classes={{root: "w-full mt-1 pl-6 pr-10"}}
+                                      classes={{ root: "w-full mt-1 pl-6 pr-10" }}
                                       placeholder="Answer"
                                     />
                                   </AccordionDetails>

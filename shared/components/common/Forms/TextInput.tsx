@@ -11,26 +11,32 @@ export interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
   inputRef?: React.RefObject<HTMLInputElement>;
   endAdornment?: React.ReactNode;
   inputProps?: any;
+  lines?: number | string;
 }
 
 export const TextInput = React.forwardRef<HTMLInputElement, Props>((props, ref) => {
-  const {classes, noFormik, white, error, label, inputRef, endAdornment, inputProps} = props;
+  const {classes, noFormik, white, error, label, inputRef, endAdornment, inputProps, lines} =
+    props;
   const [field, meta, helpers] = noFormik ? [] : useField(props as any);
   const finalProps = noFormik ? {...props, ...inputProps} : {...field, ...props};
 
+  const InputElement = lines ? "textarea" : "input";
+
   return (
     <div className={clsx(classes?.root)} ref={ref}>
-      {label && <span className="text-sm text-black">{label}</span>}
+      {label && <span className="text-sm text-gray-600 font-semibold">{label}</span>}
       <div
         className={clsx(
           white
-            ? `border-1 border-gray-400 rounded-full bg-white border-orange p-1 appearance-none border overflow-hidden `
+            ? `border-1 border-gray-400 rounded-${lines ? "md" : "xl"
+            } bg-white border-orange p-1 appearance-none border overflow-hidden `
             : `border rounded-lg border-orange p-1.5 bg-black`
         )}
       >
-        <input
+        <InputElement
           {...finalProps}
           ref={inputRef}
+          rows={lines}
           className={clsx(
             white
               ? [

@@ -139,16 +139,18 @@ export const WalletModal: React.FunctionComponent<WalletModalProps> = ({
           <div className="flex justify-center w-full mb-4">
             <div className="w-1/2 border-r-2 border-black p-4 flex flex-col">
               <div className="grid grid-cols-3 gap-2">
-                {NETWORKS.map(([entry, config], i) => (
-                  <button
-                    className={`hover:scale-125 items-center flex flex-col ${selectedNetwork === config.settings.chainId ? "opacity-100" : "opacity-50"
-                      }`}
-                    onClick={() => setSelectedNetwork(config.settings.chainId)}
-                  >
-                    <Image src={config.settings.logo} alt="me" width="35" height="35" />
-                    <p className="text-sm font-medium">{config.settings.name}</p>
-                  </button>
-                ))}
+                {NETWORKS.map(([entry, config], i) =>
+                  config.isActive ? (
+                    <button
+                      className={`hover:scale-125 items-center flex flex-col ${selectedNetwork === config.settings.chainId ? "opacity-100" : "opacity-50"
+                        }`}
+                      onClick={() => setSelectedNetwork(config.settings.chainId)}
+                    >
+                      <Image src={config.settings.logo} alt="me" width="35" height="35" />
+                      <p className="text-sm font-medium">{config.settings.name}</p>
+                    </button>
+                  ) : null
+                )}
               </div>
             </div>
             <div className="w-1/2 px-4 flex flex-col">

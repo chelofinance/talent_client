@@ -88,6 +88,10 @@ export const getUserCheloDAOs = async (args: {
         metadata: proposalsInfo.find((info) => info.proposalId === proposal.proposalId),
         votesYes: yes.toString(),
         votesNo: yes.toString(),
+        votes: proposal.votecast.map((vote) => ({
+          voter: vote.voter.id,
+          timestamp: vote.timestamp,
+        })),
         calls: proposal.calls.map((call) => ({
           proposalId: proposal.proposalId,
           target: call.target.id,

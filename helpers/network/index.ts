@@ -34,7 +34,7 @@ export type NetworkName = "ethereum" | "goerli" | "polygon" | "mumbai" | "hardha
 
 export const networkConfigs: Record<NetworkName, NetworkConfig> = {
   ethereum: {
-    isActive: true,
+    isActive: false,
     provider: "",
     providerWs: "",
     addresses: {
@@ -121,7 +121,7 @@ export const networkConfigs: Record<NetworkName, NetworkConfig> = {
     },
   },
   mumbai: {
-    isActive: true,
+    isActive: false,
     provider: `https://polygon-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_MUMBAI_PROVIDER}`,
     providerWs: `wss://polygon-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_MUMBAI_PROVIDER}`,
     addresses: {

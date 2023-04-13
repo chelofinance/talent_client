@@ -11,6 +11,8 @@ import TransactionModal from "@shared/components/common/TransactionModal";
 
 interface Props {}
 
+const notBackButtonRoutes = ["/create_event"];
+
 const Layout: React.FunctionComponent<Props> = ({children}) => {
   const router = useRouter();
   const isReturnRoute = router.route !== "/";
@@ -33,7 +35,7 @@ const Layout: React.FunctionComponent<Props> = ({children}) => {
         <div className="w-full bg-no-repeat relative min-h-screen">
           {isReturnRoute && <ErrorCard classes={{root: "absolute top-24 right-3"}} />}
           <div className={`z-50 relative h-full ${isReturnRoute && "md:px-20 sm:px-40 pt-32"}`}>
-            {isReturnRoute && (
+            {isReturnRoute && !notBackButtonRoutes.includes(router.route) && (
               <button onClick={goBack} className="flex items-center gap-1 text-violet-500">
                 <ArrowBackIosIcon />
                 <span>Back</span>

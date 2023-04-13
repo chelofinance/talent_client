@@ -204,6 +204,7 @@ export const onSubscribeEvents = createAsyncThunk<boolean, void, {state: RootSta
 
     coreContract.on("ProposalExecuted", (...args: [BigNumber, Log]) => {
       const [proposalId, event] = args;
+      console.log("ProposalExecuted", args);
       dispatch(
         onProposalExecuted({
           proposalId,

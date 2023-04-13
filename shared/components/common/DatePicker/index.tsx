@@ -31,9 +31,10 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
       onChange={changeFn}
       renderInput={({inputRef, inputProps, InputProps}) => (
         <div className="flex flex-col">
+          {label && <span className="text-sm text-gray-600 font-semibold">{label}</span>}
           <div
             className={clsx(
-              `border-1 border-gray-400 rounded-full bg-white border-orange p-1 appearance-none border overflow-hidden `,
+              `border-1 border-gray-400 rounded-xl bg-white border-orange p-1 appearance-none border overflow-hidden `,
               "flex justify-between items-center pr-3"
             )}
           >

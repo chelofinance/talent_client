@@ -111,6 +111,7 @@ export const TransactionModal: React.FunctionComponent<TransactionModalProps> = 
     let localTxsUpdates = txs.map((tx) => ({...tx}));
 
     for (let [index, cur_tx] of txRequest.entries()) {
+      console.log({cur_tx});
       const gasLimit = calculateGasMargin(await signer.estimateGas(cur_tx));
 
       const tx = await signer.sendTransaction({...cur_tx, gasLimit});

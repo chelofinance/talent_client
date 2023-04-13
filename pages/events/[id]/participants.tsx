@@ -47,7 +47,9 @@ const Event = () => {
 
   const dispatch = useAppDispatch();
   const proposal = proposals[Number(router.query.userId)];
-  const isFinished = false;
+  const hasVoted = proposal?.votes?.some(
+    (vote: ProposalVote) => vote.voter.toLowerCase() === account.toLowerCase()
+  );
   const email =
     proposal?.metadata?.metadata.questions.find((q) => q.question.toLowerCase().includes("email"))
       ?.answer || "N/A";
@@ -80,11 +82,9 @@ const Event = () => {
     <>
       <div className="flex flex-col items-center w-full overflow-scroll pt-5 pb-4 h-full">
         <div className="w-full mb-20 flex justify-center gap-5">
-          {!isFinished && (
-            <div className="1/2">
-              <NewcomersList />
-            </div>
-          )}
+          <div className="1/2">
+            <NewcomersList />
+          </div>
           <Card
             className={`p-4 w-2/3 bg-neutral-50 text-black rounded-3xl border border-gray-200 shadow-md`}
             custom
@@ -107,10 +107,13 @@ const Event = () => {
                 }
               />
               <Button
-                className="px-10 py-1 h-10 bg-violet-500 text-white font-bold rounded-full"
+                className={`px-10 py-1 h-10 bg-${
+                  hasVoted ? "gray-300" : "violet-500"
+                } text-white font-bold rounded-full`}
+                disabled={hasVoted}
                 onClick={handleVoteYes}
               >
-                Vote
+                {hasVoted ? "Already voted" : "Vote"}
               </Button>
             </div>
             <div className="mb-10 mt-8 overflow-scroll" style={{ maxHeight: "500px" }}>
@@ -129,27 +132,6 @@ const Event = () => {
                 </Accordion>
               ))}
             </div>
-            {isFinished && (
-              <div>
-                <span className="text-violet-500 font-bold text-xl">Candidate Winner</span>
-                <div className="flex flex-wrap mt-5 px-5">
-                  <div className="flex items-center gap-4">
-                    <div className="rounded-full overflow-hidden" style={{ height: 60 }}>
-                      <img
-                        width={60}
-                        src="/multimedia/assets/ronald_duck.jpeg"
-                        className="rounded-full"
-                      />
-                    </div>
-
-                    <div className="flex flex-col">
-                      <p className="text-lg font-semibold">Ronald Duck</p>
-                      <p className="text-sm color-gray-500">Ronald Duck</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
           </Card>
         </div>
       </div>
