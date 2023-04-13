@@ -14,6 +14,8 @@ import {Button} from "@shared/components/common/Forms/Button";
 import EventCard from "@shared/components/talent/EventCard";
 import {ipfsToHttp} from "@helpers/index";
 
+const UPLOADING_TAG = "uploading";
+
 type FormValues = {
   name: string;
   location: string;
@@ -95,7 +97,9 @@ const CreateEvent = () => {
                 .min(new Date(), "Start time must be in the future")
                 .required("Start time required"),
               description: Yup.string().required("Description required"),
-              image: Yup.string().required("Image required"),
+              image: Yup.string()
+                .test("notUploading", (image) => image !== UPLOADING_TAG)
+                .required("Image required"),
               fileImage: Yup.mixed().required("Image required"),
               numberOfWinners: Yup.number()
                 .required("Number of winners required")
@@ -145,17 +149,17 @@ const CreateEvent = () => {
                       />
                       <div className="bg-gray-300"></div>
                       <Button
-                        className={`w-1/3 p-2 bg-${values.image === "uploading" ? "gray-300" : "violet-500"
+                        className={`w-1/3 p-2 bg-${values.image === UPLOADING_TAG ? "gray-300" : "violet-500"
                           } text-white rounded-xl font-bold mt-4`}
-                        disabled={values.image === "uploading"}
+                        disabled={values.image === UPLOADING_TAG}
                         onClick={async () => {
-                          setFieldValue("image", "uploading");
+                          setFieldValue("image", UPLOADING_TAG);
                           const imageCid = `${await upload([values.fileImage])}/${values.fileImage.name
                             }`;
                           setFieldValue("image", imageCid);
                         }}
                       >
-                        {values.image === "uploading"
+                        {values.image === UPLOADING_TAG
                           ? "Uploading..."
                           : values.image
                             ? "Update"

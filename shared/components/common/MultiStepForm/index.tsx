@@ -46,7 +46,6 @@ export const MultiStepForm = <T extends unknown>(props: MultiStepFormProps<T>) =
                 <Button
                   type="button"
                   disabled={hasErrors}
-                  loading={customLoading !== undefined ? customLoading : isSubmitting}
                   className={`bg-transparent font-semibold flex items-center ${hasErrors ? "text-gray-400" : "text-violet-500"
                     }`}
                   onClick={() => {
