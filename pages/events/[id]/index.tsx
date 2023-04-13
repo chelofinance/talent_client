@@ -20,6 +20,11 @@ const Event = () => {
 
   const event = daos[0]?.rounds.find((round) => round.id === router.query.id);
   const isFinished = event?.finished;
+  const showList = !isFinished && proposals.length > 0;
+
+  const handleAddList = () => {
+    router.push(`/events/${router.query.id}/add_participant`);
+  };
 
   const handleWinnerClick = (participantWallet: string) => () => {
     router.push({
@@ -53,12 +58,15 @@ const Event = () => {
             />
           </div>
 
-          {!isFinished && proposals.length > 0 && (
-            <div className="w-1/3 flex flex-col ">
-              <h2 className="text-violet-500 text-xl mb-4">Leaderboard</h2>
-              <NewcomersList proposals={proposals} />
+          <div className={`${showList ? "w-1/3" : ""} flex flex-col `}>
+            {showList && <h2 className="text-violet-500 text-xl mb-4">Leaderboard</h2>}
+            <div className="flex flex-col items-end">
+              {showList && <NewcomersList proposals={proposals} />}
+              <Button classes={{root: "w-52 rounded-xl text-sm"}} onClick={handleAddList}>
+                Add Candidate List
+              </Button>
             </div>
-          )}
+          </div>
         </div>
       </div>
     </>
@@ -72,10 +80,6 @@ const NewcomersList: React.FunctionComponent<{proposals: MiniDaoProposal[]}> = (
   const decimals = daos.length > 0 ? daos[0].token.decimals : 6;
   const sortedProposals = [...proposals].sort((a, b) => Number(b.votesYes) - Number(a.votesYes));
 
-  const handleAddList = () => {
-    router.push(`/events/${router.query.id}/add_participant`);
-  };
-
   const handleClick = (userIndex: string) => () => {
     router.push({
       pathname: `/events/${router.query.id}/participants`,
@@ -86,54 +90,48 @@ const NewcomersList: React.FunctionComponent<{proposals: MiniDaoProposal[]}> = (
   };
 
   return (
-    <div className="flex flex-col items-end">
-      <Card
-        className="py-10 pt-0 mb-5 w-full bg-neutral-50 text-black rounded-3xl border border-gray-200 shadow-md"
-        custom
-      >
-        <div className="overflow-y-scroll max-h-[30.7rem] px-12 ">
-          {proposals.length === 0 ? (
-            <p className="text-gray-500">There are no participants</p>
-          ) : (
-            sortedProposals.map(({metadata, votesYes}, i) => (
-              <div
-                key={i}
-                className={"mt-8 hover:bg-gray-100 cursor-pointer"}
-                onClick={handleClick(String(i))}
-              >
-                <AvatarElement
-                  badge={true}
-                  address={metadata?.metadata.wallet}
-                  count={prettifyNumber(toBN(votesYes).div(toBN(10).pow(decimals)))}
-                  infoComponent={
-                    <div className="flex flex-col">
-                      <p className="text-md font-semibold whitespace-nowrap">
-                        {metadata?.metadata.name}
-                      </p>
-                      <p className="text-xs text-gray-600">{metadata?.metadata.name}</p>
-                    </div>
-                  }
-                  badgeContent={
-                    <div className="w-8 h-8 rounded-full bg-violet-500 text-white font-semibold flex items-center justify-center text-xs">
-                      {prettifyNumber(toBN(votesYes).div(toBN(10).pow(decimals)))}
-                    </div>
-                  }
-                />
-              </div>
-            ))
-          )}
-        </div>
-        <Link href={`/events/${router.query.id}/leaderboard`}>
-          <span className="text-violet-500 text-md mt-4 block w-full text-center cursor-pointer">
-            View all rankings
-          </span>
-        </Link>
-      </Card>
-
-      <Button classes={{root: "w-52 rounded-xl text-sm"}} onClick={handleAddList}>
-        Add Candidate List
-      </Button>
-    </div>
+    <Card
+      className="py-10 pt-0 mb-5 w-full bg-neutral-50 text-black rounded-3xl border border-gray-200 shadow-md"
+      custom
+    >
+      <div className="overflow-y-scroll max-h-[30.7rem] px-12 ">
+        {proposals.length === 0 ? (
+          <p className="text-gray-500">There are no participants</p>
+        ) : (
+          sortedProposals.map(({metadata, votesYes}, i) => (
+            <div
+              key={i}
+              className={"mt-8 hover:bg-gray-100 cursor-pointer"}
+              onClick={handleClick(String(i))}
+            >
+              <AvatarElement
+                badge={true}
+                address={metadata?.metadata.wallet}
+                count={prettifyNumber(toBN(votesYes).div(toBN(10).pow(decimals)))}
+                infoComponent={
+                  <div className="flex flex-col">
+                    <p className="text-md font-semibold whitespace-nowrap">
+                      {metadata?.metadata.name}
+                    </p>
+                    <p className="text-xs text-gray-600">{metadata?.metadata.name}</p>
+                  </div>
+                }
+                badgeContent={
+                  <div className="w-8 h-8 rounded-full bg-violet-500 text-white font-semibold flex items-center justify-center text-xs">
+                    {prettifyNumber(toBN(votesYes).div(toBN(10).pow(decimals)))}
+                  </div>
+                }
+              />
+            </div>
+          ))
+        )}
+      </div>
+      <Link href={`/events/${router.query.id}/leaderboard`}>
+        <span className="text-violet-500 text-md mt-4 block w-full text-center cursor-pointer">
+          View all rankings
+        </span>
+      </Link>
+    </Card>
   );
 };
 
