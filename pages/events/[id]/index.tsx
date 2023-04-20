@@ -62,9 +62,11 @@ const Event = () => {
             {showList && <h2 className="text-violet-500 text-xl mb-4">Leaderboard</h2>}
             <div className="flex flex-col items-end">
               {showList && <NewcomersList proposals={proposals} />}
-              <Button classes={{root: "w-52 rounded-xl text-sm"}} onClick={handleAddList}>
-                Add Candidate List
-              </Button>
+              {!isFinished && (
+                <Button classes={{root: "w-52 rounded-xl text-sm"}} onClick={handleAddList}>
+                  Add Candidate List
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -80,11 +82,11 @@ const NewcomersList: React.FunctionComponent<{proposals: MiniDaoProposal[]}> = (
   const decimals = daos.length > 0 ? daos[0].token.decimals : 6;
   const sortedProposals = [...proposals].sort((a, b) => Number(b.votesYes) - Number(a.votesYes));
 
-  const handleClick = (userIndex: string) => () => {
+  const handleClick = (userId: string) => () => {
     router.push({
       pathname: `/events/${router.query.id}/participants`,
       query: {
-        userId: userIndex,
+        userId: userId,
       },
     });
   };
@@ -102,7 +104,7 @@ const NewcomersList: React.FunctionComponent<{proposals: MiniDaoProposal[]}> = (
             <div
               key={i}
               className={"mt-8 hover:bg-gray-100 cursor-pointer"}
-              onClick={handleClick(String(i))}
+              onClick={handleClick(metadata.metadata.wallet)}
             >
               <AvatarElement
                 badge={true}

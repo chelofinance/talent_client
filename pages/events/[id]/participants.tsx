@@ -1,24 +1,24 @@
 import React from "react";
-import { useRouter } from "next/router";
+import {useRouter} from "next/router";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MuiAccordion from "@mui/material/Accordion";
 import MuiAccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
-import { styled } from "@mui/system";
+import {styled} from "@mui/system";
 
 import Card from "@shared/components/common/Card";
-import { Button } from "@shared/components/common/Forms";
+import {Button} from "@shared/components/common/Forms";
 import AvatarElement from "@shared/components/common/AvatarElement";
-import { useDaos, useProposals } from "@shared/hooks/daos";
-import { useAppDispatch } from "@redux/store";
-import { onShowTransaction } from "@redux/actions";
-import { useWeb3React } from "@web3-react/core";
-import { attach } from "@helpers/contracts";
-import { getNetworkProvider, getProvider, toBN } from "@helpers/index";
-import { prettifyNumber } from "@helpers/erc";
+import {useDaos, useProposals} from "@shared/hooks/daos";
+import {useAppDispatch} from "@redux/store";
+import {onShowTransaction} from "@redux/actions";
+import {useWeb3React} from "@web3-react/core";
+import {attach} from "@helpers/contracts";
+import {getNetworkProvider, getProvider, toBN} from "@helpers/index";
+import {prettifyNumber} from "@helpers/erc";
 
-const Accordion = styled(MuiAccordion)(({ theme }) => ({
+const Accordion = styled(MuiAccordion)(({theme}) => ({
   backgroundColor: "#f1f2f4",
   borderRadius: theme.shape.borderRadius,
   boxShadow: "none",
@@ -41,12 +41,14 @@ const AccordionSummary = styled(MuiAccordionSummary)(() => ({
 
 const Event = () => {
   const router = useRouter();
-  const { daos } = useDaos();
-  const { account, chainId } = useWeb3React();
-  const { proposals } = useProposals(router.query.id as string);
+  const {daos} = useDaos();
+  const {account, chainId} = useWeb3React();
+  const {proposals} = useProposals(router.query.id as string);
 
   const dispatch = useAppDispatch();
-  const proposal = proposals[Number(router.query.userId)];
+  const proposal = proposals.find(
+    ({metadata}) => metadata.metadata.wallet === router.query.userId
+  );
   const hasVoted = proposal?.votes?.some(
     (vote: ProposalVote) => vote.voter.toLowerCase() === account.toLowerCase()
   );
@@ -107,16 +109,15 @@ const Event = () => {
                 }
               />
               <Button
-                className={`px-10 py-1 h-10 bg-${
-                  hasVoted ? "gray-300" : "violet-500"
-                } text-white font-bold rounded-full`}
+                className={`px-10 py-1 h-10 bg-${hasVoted ? "gray-300" : "violet-500"
+                  } text-white font-bold rounded-full`}
                 disabled={hasVoted}
                 onClick={handleVoteYes}
               >
                 {hasVoted ? "Already voted" : "Vote"}
               </Button>
             </div>
-            <div className="mb-10 mt-8 overflow-scroll" style={{ maxHeight: "500px" }}>
+            <div className="mb-10 mt-8 overflow-scroll" style={{maxHeight: "500px"}}>
               {proposal?.metadata?.metadata.questions.map((q, index) => (
                 <Accordion key={index}>
                   <AccordionSummary
@@ -141,15 +142,15 @@ const Event = () => {
 
 const NewcomersList: React.FunctionComponent<{}> = (props) => {
   const router = useRouter();
-  const { proposals } = useProposals(router.query.id as string);
-  const { daos } = useDaos();
+  const {proposals} = useProposals(router.query.id as string);
+  const {daos} = useDaos();
   const decimals = daos.length > 0 ? daos[0].token.decimals : 6;
 
-  const handleClick = (userIndex: string) => () => {
+  const handleClick = (userId: string) => () => {
     router.push({
       pathname: `/events/${router.query.id as string}/participants`,
       query: {
-        userId: userIndex,
+        userId: userId,
       },
     });
   };
@@ -162,9 +163,12 @@ const NewcomersList: React.FunctionComponent<{}> = (props) => {
       <div className="p-4 border-b border-gray-200 flex justify-center">
         <span className="text-violet-500 font-semibold">Candidates</span>
       </div>
-      <div className="overflow-scroll" style={{ maxHeight: "600px" }}>
-        {proposals.map(({ metadata, votesYes }, i) => (
-          <div className={"mt-8 hover:bg-gray-100 px-8"} onClick={handleClick(String(i))}>
+      <div className="overflow-scroll" style={{maxHeight: "600px"}}>
+        {proposals.map(({metadata, votesYes}, i) => (
+          <div
+            className={"mt-8 hover:bg-gray-100 px-8"}
+            onClick={handleClick(metadata.metadata.wallet)}
+          >
             <AvatarElement
               address={metadata?.metadata.wallet}
               badge={true}

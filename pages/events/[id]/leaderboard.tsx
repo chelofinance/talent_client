@@ -1,26 +1,26 @@
 import React from "react";
-import {useRouter} from "next/router";
+import { useRouter } from "next/router";
 import Card from "@shared/components/common/Card";
 import AvatarElement from "@shared/components/common/AvatarElement";
-import {useDaos, useProposals} from "@shared/hooks/daos";
+import { useDaos, useProposals } from "@shared/hooks/daos";
 import ThumbUpOffAltIcon from "@mui/icons-material/ThumbUpOffAlt";
-import {prettifyNumber} from "@helpers/erc";
-import {toBN} from "@helpers/index";
+import { prettifyNumber } from "@helpers/erc";
+import { toBN } from "@helpers/index";
 
 const Leaderboard: React.FunctionComponent = () => {
   const router = useRouter();
-  const {daos} = useDaos();
-  const {proposals: prop} = useProposals(router.query.id as string);
+  const { daos } = useDaos();
+  const { proposals: prop } = useProposals(router.query.id as string);
   const proposals = [...prop];
   const decimals = daos.length > 0 ? daos[0].token.decimals : 6;
 
   const sortedProposals = proposals.sort((a, b) => Number(b.votesYes) - Number(a.votesYes));
 
-  const handleClick = (userIndex: string) => () => {
+  const handleClick = (userId: string) => () => {
     router.push({
       pathname: `/events/${router.query.id as string}/participants`,
       query: {
-        userId: userIndex,
+        userId: userId,
       },
     });
   };
@@ -37,11 +37,11 @@ const Leaderboard: React.FunctionComponent = () => {
         {sortedProposals.length === 0 ? (
           <p className="text-gray-500">There are no participants</p>
         ) : (
-          sortedProposals.map(({metadata, votesYes}, i) => (
+          sortedProposals.map(({ metadata, votesYes }, i) => (
             <div
               key={i}
               className="mt-8 hover:bg-gray-100 cursor-pointer flex items-center px-16 w-full justify-between"
-              onClick={handleClick(String(i))}
+              onClick={handleClick(metadata.metadata.wallet)}
             >
               <div className="flex items-center gap-5">
                 <div className="mr-10">
@@ -49,7 +49,7 @@ const Leaderboard: React.FunctionComponent = () => {
                 </div>
                 <AvatarElement
                   address={metadata.metadata.wallet}
-                  classes={{root: "w-full flex justify-between"}}
+                  classes={{ root: "w-full flex justify-between" }}
                 />
                 <div className="flex flex-col">
                   <p className="text-md font-semibold whitespace-nowrap">
