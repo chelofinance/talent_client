@@ -162,16 +162,6 @@ const AddParticipant = () => {
     return batchSize;
   };
 
-  const calculateMintAmount = async (token: Contract) => {
-    const totalSupply = await token.totalSupply();
-    const group = await token.groups(2);
-
-    return totalSupply
-      .div(100)
-      .mul(group.power)
-      .div(group.mints || dao.members.length);
-  };
-
   const onImportSubmit = async () => {
     setUploading(true);
     try {
@@ -230,13 +220,9 @@ const AddParticipant = () => {
         throw Error("Users wallet");
       }
 
-      const tokenContract = attach(
-        "ElasticVotes",
-        dao.token.address,
-        getNetworkProvider(networkId)
-      );
+      const tokenContract = attach("ERC1155", dao.token.address, getNetworkProvider(networkId));
       const cids = await uploadUsersData(questionedData);
-      const mintAmount = await calculateMintAmount(tokenContract);
+      const mintAmount = 1;
 
       const proposalsArray: ProposalInfo[] = cids.map((cid, i) => {
         const addGroupCalldata = tokenContract.interface.encodeFunctionData("addToGroup", [

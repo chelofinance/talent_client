@@ -61,7 +61,6 @@ export const getUserCheloDAOs = async (args: {
   ).reduce((acc, cur) => cur.concat(acc), []);
 
   return res.governors.map((governor) => {
-    const isERC20 = Boolean(governor.token.asERC20);
     const proposals = governor.proposals.map((proposal) => {
       const {yes, no} = proposal.votecast.reduce(
         (acc, cur) => ({
@@ -106,20 +105,16 @@ export const getUserCheloDAOs = async (args: {
       wallet: governor.id,
       type: "chelo",
       mini_daos: [], //TODO
-      members: isERC20
-        ? governor.token.asERC20.balances.map((bal) => ({
-          account: bal.account?.id,
-          stake: bal.valueExact,
-        }))
-        : governor.token.asERC721.tokens.map((tkn) => ({account: tkn.owner, stake: 1})),
+      members: governor.token.asERC1155.balances.map((bal) => ({
+        account: bal.account?.id,
+        stake: bal.valueExact,
+      })),
       isRoot: false, //TODO
       erc20: [],
       erc721: [],
       token: {
-        address: isERC20
-          ? governor.token.asERC20.asAccount.id
-          : governor.token.asERC721.asAccount.id,
-        decimals: governor.token.asERC20.decimals,
+        address: governor.token.asERC1155.asAccount.id,
+        decimals: 0,
       },
       votesLength: governor.proposals.length.toString(),
       votingDelay: governor.votingDelay as string,
