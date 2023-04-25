@@ -153,16 +153,32 @@ export function getProposalId(
   );
 }
 
-export const getRoundInfo = async (round: ProposalRound): Promise<ProposalRound> => {
+export const getRoundInfo = async (
+  round: GovernorsQuery["proposalRounds"][0]
+): Promise<ProposalRound> => {
   const metadata = await getIpfsRound(round.description);
   const imageUrl = ipfsToHttp(metadata.image);
+  let finalImage = "";
   try {
-    const validImage = await checkImage(imageUrl);
-    return {...round, metadata: {...metadata, image: validImage}};
+    finalImage = await checkImage(imageUrl);
   } catch {
-    const defaultImage = "/multimedia/chelo/logo_black.png";
-    return {...round, metadata: {...metadata, image: defaultImage}};
+    finalImage = "/multimedia/chelo/logo_black.png";
   }
+
+  return {
+    id: round.id,
+    startBlock: round.startBlock.toString(),
+    endBlock: round.endBlock.toString(),
+    description: round.description,
+    finished: false,
+    executeThreshold: round.executeThreshold,
+    proposals: [],
+    roles: round.roleVotes.map(({maxVotes, roleId}) => ({
+      maxVotes: Number(maxVotes),
+      id: roleId.toString(),
+    })),
+    metadata: {...metadata, image: finalImage},
+  };
 };
 
 export function ipfsToHttp(cid: string, gateway = "https://ipfs.io/ipfs/"): string {

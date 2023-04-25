@@ -97,6 +97,7 @@ type ProposalRound = {
   description: string;
   finished: boolean;
   executeThreshold: number;
+  roles: {maxVotes: number; id: string}[];
   metadata?: {
     title: string;
     description: string;
