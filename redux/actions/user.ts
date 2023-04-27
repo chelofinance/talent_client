@@ -10,8 +10,15 @@ import {TransactionMeta} from "types";
 import {getNetworkConfig} from "@helpers/network";
 import {RootState} from "@redux/store";
 import {attach} from "@helpers/contracts";
-import {BigNumber} from "ethers";
-import {onCreateProposal, onProposalExecuted, onRoundCreated, onVoteCast} from "./daos";
+import {BigNumber, ethers} from "ethers";
+import {
+  onCreateProposal,
+  onProposalExecuted,
+  onRoundCreated,
+  onTokenBurn,
+  onTokenMint,
+  onVoteCast,
+} from "./daos";
 import {Log} from "@ethersproject/providers";
 
 export const onConnectWallet = createAsyncThunk<
@@ -142,11 +149,12 @@ export const onSubscribeEvents = createAsyncThunk<boolean, void, {state: RootSta
   async (_, {getState, dispatch, rejectWithValue}) => {
     const state = getState();
     const chainId = state.user.account.networkId;
-    const coreAddress = state.daos.daos[0].id;
+    const dao = state.daos.daos[0] as MiniDAO;
     const {provider: rpc} = getNetworkConfig(chainId);
     const provider = getProvider(rpc);
 
-    const coreContract = attach("RoundVoting", coreAddress, provider);
+    const coreContract = attach("RoundVoting", dao.id, provider);
+    const token = attach("ERC1155", dao.token.address, provider);
 
     coreContract.on(
       "ProposalCreated",
@@ -190,7 +198,7 @@ export const onSubscribeEvents = createAsyncThunk<boolean, void, {state: RootSta
             startBlock,
             endBlock,
             description,
-            coreAddress,
+            coreAddress: dao.id,
           })
         );
       }
@@ -199,7 +207,7 @@ export const onSubscribeEvents = createAsyncThunk<boolean, void, {state: RootSta
     coreContract.on("VoteCast", (...args: [string, BigNumber, number, BigNumber, string, Log]) => {
       const [voter, proposalId, support, votes, reason, event] = args;
       console.log("VoteCast", args);
-      dispatch(onVoteCast({voter, proposalId, support, votes, reason, coreAddress}));
+      dispatch(onVoteCast({voter, proposalId, support, votes, reason, coreAddress: dao.id}));
     });
 
     coreContract.on("ProposalExecuted", (...args: [BigNumber, Log]) => {
@@ -208,7 +216,7 @@ export const onSubscribeEvents = createAsyncThunk<boolean, void, {state: RootSta
       dispatch(
         onProposalExecuted({
           proposalId,
-          coreAddress,
+          coreAddress: dao.id,
         })
       );
     });
@@ -219,10 +227,42 @@ export const onSubscribeEvents = createAsyncThunk<boolean, void, {state: RootSta
       dispatch(
         onRoundCreated({
           roundId,
-          coreAddress,
+          coreAddress: dao.id,
         })
       );
     });
+
+    token.on(
+      "TransferSingle",
+      (...args: [string, string, string, BigNumber, BigNumber, unknown, Log]) => {
+        const [_operator, from, to, idRole, amount, _data, log] = args;
+        console.log("TransferSingle", from, to, idRole, amount);
+
+        if (from === ethers.constants.AddressZero) {
+          //mint
+          dispatch(
+            onTokenMint({
+              from,
+              to,
+              id: idRole,
+              amount: amount,
+              coreAddress: dao.id,
+            })
+          );
+        } else {
+          // burn
+          dispatch(
+            onTokenBurn({
+              from,
+              to,
+              id: idRole,
+              amount: amount,
+              coreAddress: dao.id,
+            })
+          );
+        }
+      }
+    );
 
     return true;
   }

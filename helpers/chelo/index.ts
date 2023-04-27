@@ -99,16 +99,20 @@ export const getUserCheloDAOs = async (args: {
         })),
       };
     });
+
     const res: MiniDAO = {
       id: governor.id,
       name: governor.name,
       wallet: governor.id,
       type: "chelo",
       mini_daos: [], //TODO
-      members: governor.token.asERC1155.balances.map((bal) => ({
-        account: bal.account?.id,
-        stake: bal.valueExact,
-      })),
+      members: governor.token.asERC1155.balances
+        .map((bal) => ({
+          account: bal.account?.id as string,
+          stake: bal.valueExact as string,
+          role: bal.token.identifier,
+        }))
+        .filter((bal) => bal.account && toBN(bal.stake).gt(0)),
       isRoot: false, //TODO
       erc20: [],
       erc721: [],

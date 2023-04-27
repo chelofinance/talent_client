@@ -60,7 +60,7 @@ interface DAO {
   wallet: string;
   type: DaoType;
   mini_daos?: MiniDAO[];
-  members?: {account: string; stake: string}[];
+  members?: {account: string; stake: string; role: string}[];
   isRoot: boolean;
   erc20?: {
     address: string;

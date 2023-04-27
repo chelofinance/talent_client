@@ -22,6 +22,8 @@ export const CREATE_PROPOSAL = "create_proposal";
 export const ROUND_CREATED = "round_created";
 export const VOTE_CAST = "vote_cast";
 export const PROPOSAL_EXECUTED = "proposal_executed";
+export const TOKEN_MINT = "token_mint";
+export const TOKEN_BURN = "token_burn";
 
 //interface
 export const UPDATE_ERROR = "update_error";

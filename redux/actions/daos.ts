@@ -9,6 +9,7 @@ import {getIpfsProposal, getRoundInfo} from "@helpers/chelo";
 import {attach} from "@helpers/contracts";
 import {getNetworkConfig} from "@helpers/network";
 import {getProvider} from "@helpers/index";
+import {GovernorsQuery} from "__generated__/gql/graphql";
 
 export const onGetUserDaos = createAsyncThunk<
   DAO[],
@@ -120,19 +121,51 @@ export const onRoundCreated = createAsyncThunk<
   } = getState();
   const {provider: rpc} = getNetworkConfig(networkId);
   const provider = getProvider(rpc);
-  const block = await provider.getBlock("latest");
   const coreContract = attach("RoundVoting", coreAddress, provider);
   const rawRound = await coreContract.getRound(roundId);
 
-  const round: ProposalRound = {
+  const round: GovernorsQuery["proposalRounds"][0] = {
     id: roundId.toString(),
-    finished: block.number >= Number(rawRound.voteEnd),
     startBlock: rawRound.voteStart.toString(),
     endBlock: rawRound.voteEnd.toString(),
     description: rawRound.description.toString(),
     executeThreshold: rawRound.executeThreshold.toString(),
-    proposals: [],
+    roleVotes: [],
   };
 
   return {round: await getRoundInfo(round), daoId: coreAddress};
 });
+
+export const onTokenMint = createAsyncThunk<
+  {coreAddress: string; account: string; role: string; stake: string},
+  {
+    from: string;
+    to: string;
+    coreAddress: string;
+    id: BigNumber;
+    amount: BigNumber;
+  },
+  {state: RootState}
+>(actionTypes.TOKEN_MINT, async ({coreAddress, to, id, amount}) => ({
+  coreAddress,
+  account: to.toString(),
+  role: id.toString(),
+  stake: amount.toString(),
+}));
+
+export const onTokenBurn = createAsyncThunk<
+  {coreAddress: string; account: string; role: string; stake: string},
+  {
+    from: string;
+    to: string;
+    coreAddress: string;
+    id: BigNumber;
+    amount: BigNumber;
+  },
+  {state: RootState}
+>(actionTypes.TOKEN_BURN, async ({coreAddress, from, id, amount}) => ({
+  coreAddress,
+  account: from.toString(),
+  role: id.toString(),
+  stake: amount.toString(),
+}));

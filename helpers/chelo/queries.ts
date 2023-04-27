@@ -1,4 +1,4 @@
-import { graphql } from "__generated__/gql";
+import {graphql} from "__generated__/gql";
 import gql from "graphql-tag";
 
 export const GET_ACCOUNT = graphql(/* GraphQL */ `
@@ -40,6 +40,10 @@ export const GET_ALL_GIVEN_OWNER = /* GraphQL */ gql`
             }
             value
             valueExact
+            token {
+              identifier
+              uri
+            }
           }
         }
       }
