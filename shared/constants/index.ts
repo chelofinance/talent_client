@@ -68,3 +68,15 @@ export const TIME_SECONDS = {
   MONTH: 3600 * 24 * 31,
   YEAR: 3600 * 24 * 365,
 };
+
+export const TokenRoles: Record<string, "talent" | "alumni" | "sponsor"> = {
+  "1": "talent",
+  "2": "alumni",
+  "3": "sponsor",
+};
+
+export const TokenRoleIds: Record<"alumni" | "talent" | "sponsor", string> = {
+  talent: "1",
+  alumni: "2",
+  sponsor: "3",
+};

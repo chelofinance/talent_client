@@ -9,11 +9,17 @@ import {WALLETS} from "@helpers/connection/utils";
 import {Connection} from "@helpers/connection";
 import {networkConfigs} from "@helpers/network";
 import {useAppDispatch, useAppSelector} from "@redux/store";
-import {onConnectWallet, onSwitchNetwork, onUpdateError} from "@redux/actions";
+import {
+  onConnectWallet,
+  onLoadWalletAssets,
+  onSubscribeEvents,
+  onSwitchNetwork,
+  onUpdateError,
+} from "@redux/actions";
 import {useWeb3React} from "@web3-react/core";
 import {useRouter} from "next/router";
 import {isAddress} from "ethers/lib/utils";
-import {dispatch} from "rxjs/internal/observable/pairs";
+import {onGetUserDaos} from "@redux/actions/daos";
 
 interface WalletModalProps {
   showModal: boolean;
@@ -33,7 +39,7 @@ const ConnectionComponent: React.FunctionComponent<{
   disabled: boolean;
 }> = (props) => {
   const {connection, src, title, disabled, network} = props;
-  const {account, isActive, chainId} = useWeb3React();
+  const {account, isActive, chainId, provider} = useWeb3React();
   const dispatch = useAppDispatch();
   const router = useRouter();
 
@@ -46,16 +52,23 @@ const ConnectionComponent: React.FunctionComponent<{
     }
   };
 
-  React.useEffect(() => {
-    if (!isAddress(account) || !isActive || chainId !== network) return;
-    dispatch(
+  const finalLoad = async () => {
+    await dispatch(
       onConnectWallet({
         connection: connection.connector,
         chainId: network,
         account,
       })
     );
+    await dispatch(onGetUserDaos(provider));
+    await dispatch(onSubscribeEvents());
+    await dispatch(onLoadWalletAssets());
     router.push("/dashboard");
+  };
+
+  React.useEffect(() => {
+    if (!isAddress(account) || !isActive || chainId !== network) return;
+    finalLoad();
   }, [account, isActive, chainId]);
 
   return (

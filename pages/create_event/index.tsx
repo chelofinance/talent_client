@@ -13,6 +13,7 @@ import MultiStepForm from "@shared/components/common/MultiStepForm";
 import {Button} from "@shared/components/common/Forms/Button";
 import EventCard from "@shared/components/talent/EventCard";
 import {ipfsToHttp} from "@helpers/index";
+import {ethers} from "ethers";
 
 const UPLOADING_TAG = "uploading";
 
@@ -24,6 +25,8 @@ type FormValues = {
   image: string;
   fileImage: File | null;
   numberOfWinners: number;
+  talentVotes: number;
+  alumniVotes: number;
 };
 
 const CreateEvent = () => {
@@ -31,6 +34,20 @@ const CreateEvent = () => {
   const {daos, loaded} = useDaos();
   const dispatch = useAppDispatch();
   const [uploading, setUploading] = useState(false);
+
+  const createRolesLimits = (values: FormValues) => {
+    const alumni = {id: "1", votes: values.alumniVotes};
+    const talent = {id: "2", votes: values.talentVotes};
+    const sponsors = {id: "3", votes: values.talentVotes};
+
+    return ethers.utils.defaultAbiCoder.encode(
+      ["uint[]", "uint[]"],
+      [
+        [alumni.id, talent.id, sponsors.id],
+        [alumni.votes, talent.votes, sponsors.votes],
+      ]
+    );
+  };
 
   const handleNormalSubmit = async (values: FormValues) => {
     setUploading(true);
@@ -57,8 +74,8 @@ const CreateEvent = () => {
           txs: [
             {
               to: dao.id,
-              signature: "createRound(string,uint256,uint64)",
-              args: [dataCid, values.numberOfWinners, numOfBlocksToWait], //TODO calculate mint amount
+              signature: "createRound(string,uint256,uint64,bytes)",
+              args: [dataCid, values.numberOfWinners, numOfBlocksToWait, createRolesLimits(values)], //TODO calculate mint amount
             },
           ],
           dao: dao.id,
@@ -89,6 +106,8 @@ const CreateEvent = () => {
               image: "",
               fileImage: null,
               numberOfWinners: 1,
+              talentVotes: 1,
+              alumniVotes: 1,
             }}
             validationSchema={Yup.object({
               name: Yup.string().required("Name required"),
@@ -102,6 +121,12 @@ const CreateEvent = () => {
                 .required("Image required"),
               fileImage: Yup.mixed().required("Image required"),
               numberOfWinners: Yup.number()
+                .required("Number of winners required")
+                .min(1, "Minimum number of winners is 1"),
+              talentVotes: Yup.number()
+                .required("Number of winners required")
+                .min(1, "Minimum number of winners is 1"),
+              alumniVotes: Yup.number()
                 .required("Number of winners required")
                 .min(1, "Minimum number of winners is 1"),
             })}
@@ -175,16 +200,20 @@ const CreateEvent = () => {
                 element: () => (
                   <div className="flex justify-center">
                     <div className="flex flex-col justify-center lg:w-1/2 md:w-full">
-                      <DateTimePicker name="endTime" label="End Date" placeholder="End time" />
+                      <DateTimePicker
+                        name="endTime"
+                        label="Voting time"
+                        placeholder="Voting time"
+                      />
                     </div>
                   </div>
                 ),
                 title: "Date Configuration",
               },
               {
-                fields: ["numberOfWinners"],
+                fields: ["numberOfWinners", "talentVotes", "alumniVotes"],
                 element: () => (
-                  <div className="flex justify-center">
+                  <div className="flex justify-center w-full">
                     <div className="flex flex-col justify-center lg:w-1/2 md:w-full">
                       <TextInput
                         type="number"
@@ -194,10 +223,26 @@ const CreateEvent = () => {
                         classes={{root: "w-full mb-4"}}
                         placeholder="Number of Winners"
                       />
+                      <TextInput
+                        type="number"
+                        white
+                        label="Talent votes"
+                        name="talentVotes"
+                        classes={{root: "w-full mb-4"}}
+                        placeholder="Number of Winners"
+                      />
+                      <TextInput
+                        type="number"
+                        white
+                        label="Alumni votes"
+                        name="alumniVotes"
+                        classes={{root: "w-full mb-4"}}
+                        placeholder="Number of Winners"
+                      />
                     </div>
                   </div>
                 ),
-                title: "Number of Winners",
+                title: "Settings",
               },
               {
                 fields: [],

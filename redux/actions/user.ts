@@ -1,9 +1,8 @@
 import {createAsyncThunk, createAction} from "@reduxjs/toolkit";
 
 import * as actionTypes from "@redux/constants";
-import {getERC20Balances, getERC721Balances} from "@helpers/erc/utils";
-import {addNetwork, getProvider, switchNetwork} from "@helpers/index";
-import {ConnectionType, network} from "@helpers/connection";
+import {addNetwork, getNetworkProvider, getProvider, switchNetwork} from "@helpers/index";
+import {ConnectionType} from "@helpers/connection";
 import {Connector} from "@web3-react/types";
 import {getConnection} from "@helpers/connection/utils";
 import {TransactionMeta} from "types";
@@ -20,6 +19,7 @@ import {
   onVoteCast,
 } from "./daos";
 import {Log} from "@ethersproject/providers";
+import {TokenRoles} from "@shared/constants";
 
 export const onConnectWallet = createAsyncThunk<
   {
@@ -44,18 +44,51 @@ export const onConnectWallet = createAsyncThunk<
 });
 
 export const onLoadWalletAssets = createAsyncThunk<
-  {erc20: ERC20[]; erc721: ERC721[]; account: string; wallet: ConnectionType},
-  {wallet: ConnectionType; account: string; networkId: SupportedNetworks},
-  {rejectValue: StateErrorType}
->(actionTypes.LOAD_ASSETS, async ({wallet, networkId, account}, {rejectWithValue}) => {
+  {
+    erc20: ERC20[];
+    erc721: ERC721[];
+    account: string;
+    wallet: ConnectionType;
+    roles: {name: string}[];
+  },
+  undefined,
+  {rejectValue: StateErrorType; state: RootState}
+>(actionTypes.LOAD_ASSETS, async (_args, {rejectWithValue, getState}) => {
   try {
-    const userTokens = await getERC20Balances(account, networkId);
-    const userNfts = await getERC721Balances(account, networkId);
+    const {
+      daos,
+      user: {
+        account: {networkId, address, wallet},
+      },
+    } = getState();
+    const dao = daos.daos[0] as MiniDAO;
+    const provider = getNetworkProvider(networkId);
+    const roles = [] as {name: RoleNames}[];
+    const token = attach("ERC1155", dao.token.address, provider);
+    const daoContract = attach("RoundVoting", dao.id, provider);
+    const tokenRole = TokenRoles[(await token.currentRole(address)).toString()];
+
+    const [MANAGER_ROLE, EXECUTE_ROLE, ROUND_ROLE] = await Promise.all([
+      await token.MANAGER_ROLE(),
+      await daoContract.EXECUTE_ROLE(),
+      await daoContract.ROUND_ROLE(),
+    ]);
+    const [hasMintingRole, hasExecRole, hasRoundRole]: boolean[] = await Promise.all([
+      token.hasRole(MANAGER_ROLE, address),
+      daoContract.hasRole(EXECUTE_ROLE, address),
+      daoContract.hasRole(ROUND_ROLE, address),
+    ]);
+
+    if (tokenRole) roles.push({name: tokenRole});
+    if (hasMintingRole) roles.push({name: "minter"});
+    if (hasRoundRole) roles.push({name: "round"});
+    if (hasExecRole) roles.push({name: "executor"});
 
     return {
-      erc20: userTokens,
-      erc721: userNfts,
-      account,
+      erc20: [], //not necessary right now
+      erc721: [], //not necessary right now
+      roles,
+      account: address,
       wallet,
     };
   } catch (err) {

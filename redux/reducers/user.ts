@@ -9,6 +9,7 @@ type UserState = {
         address: string;
         wallet: ConnectionType;
         networkId: SupportedNetworks;
+        roles: {name: RoleNames}[];
         subscribed: boolean;
     };
     transaction: {
@@ -33,6 +34,7 @@ const user_state: UserState = {
         address: "",
         wallet: ConnectionType.INJECTED,
         networkId: null,
+        roles: [],
         subscribed: false,
     },
     transaction: {
@@ -58,6 +60,12 @@ export const userReducer = createReducer(user_state, (builder) => {
         state.account.address = action.payload.account;
         state.account.wallet = action.payload.wallet;
         state.account.networkId = action.payload.networkId;
+    });
+
+    builder.addCase(actions.onLoadWalletAssets.fulfilled, (state: UserState, action) => {
+        state.assets.erc721 = action.payload.erc721;
+        state.assets.erc20 = action.payload.erc20 as any;
+        state.account.roles = action.payload.roles;
     });
 
     builder.addCase(actions.onUpdateError, (state: UserState, action) => {

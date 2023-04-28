@@ -7,6 +7,7 @@ type VoteSettings = Partial<Setting & {maxPrincipal: string; minPrincipal: strin
 type DaoType = "snapshot" | "aragon" | "syndicate" | "chelo";
 type MiniDaoType = "membership" | "reputation" | "company";
 type TransactionStatus = "waiting" | "confirmed" | "sent" | "executed";
+type RoleNames = "alumni" | "talent" | "sponsor" | "minter" | "executor" | "round";
 
 type ScriptType =
   | "loan"
