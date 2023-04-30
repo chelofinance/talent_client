@@ -116,7 +116,7 @@ export const networkConfigs: Record<NetworkName, NetworkConfig> = {
       feeController: "",
     },
     endpoints: {
-      chelo: "https://api.thegraph.com/subgraphs/name/rcontre360/chelo_treasury_mumbai",
+      chelo: "https://api.thegraph.com/subgraphs/name/rcontre360/talent_subgraph",
       explorer: `https://api-testnet.polygonscan.com/api?apikey=${process.env.NEXT_PUBLIC_MUMBAI_KEY}`,
       aragon: null,
     },
