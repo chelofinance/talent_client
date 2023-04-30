@@ -110,7 +110,7 @@ const Event = () => {
             to: dao.id,
             signature: "managerExecute(address[],uint256[],bytes[],bytes32)",
             args: [targets, values, calldatas, hash(proposal.description)],
-            value: feeInEth.amount,
+            value: feeInEth.amount.toString(),
           },
         ],
         type: "wallet",
