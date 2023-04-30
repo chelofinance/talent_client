@@ -57,7 +57,7 @@ export const networkConfigs: Record<NetworkName, NetworkConfig> = {
     },
   },
   goerli: {
-    isActive: true,
+    isActive: false,
     provider: `https://eth-goerli.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_GOERLI_PROVIDER}`,
     providerWs: `wss://eth-goerli.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_GOERLI_PROVIDER}`,
     addresses: {
@@ -109,7 +109,7 @@ export const networkConfigs: Record<NetworkName, NetworkConfig> = {
     },
   },
   mumbai: {
-    isActive: false,
+    isActive: true,
     provider: `https://polygon-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_MUMBAI_PROVIDER}`,
     providerWs: `wss://polygon-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_MUMBAI_PROVIDER}`,
     addresses: {
