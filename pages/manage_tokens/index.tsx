@@ -26,7 +26,7 @@ const ManageTokens = () => {
   const dispatch = useAppDispatch();
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedList, setSelectedList] = useState(tokenSelected.Alumni);
+  const [selectedList, setSelectedList] = useState(tokenSelected.Talent);
   const [showForm, setShowForm] = useState(false);
   const [newMembers, setNewMembers] = useState([{wallet: ""}]);
 

@@ -4,13 +4,14 @@ import {IconButton} from "@mui/material";
 import {ArrowBackIos, ArrowForwardIos} from "@mui/icons-material";
 
 import Spiner from "@shared/components/common/Spiner";
-import {useDaos} from "@shared/hooks/daos";
+import {useDaos, useRole} from "@shared/hooks/daos";
 import Card from "@shared/components/common/Card";
 import {Button} from "@shared/components/common/Forms";
 import Link from "next/link";
 
 const Dashboard = () => {
   const {daos, loaded} = useDaos();
+  const {round} = useRole();
   const router = useRouter();
   const eventRounds = daos[0]?.rounds || [];
   const itemsPerPage = 3;
@@ -92,9 +93,11 @@ const Dashboard = () => {
           ) : loaded ? (
             <div className="w-full h-full flex flex-col justify-center items-center">
               <span className="text-xl">There are no events to show</span>
-              <Link href="/create_event">
-                <p className="text-xl cursor-pointer text-violet-500">Create event</p>
-              </Link>
+              {round && (
+                <Link href="/create_event">
+                  <p className="text-xl cursor-pointer text-violet-500">Create event</p>
+                </Link>
+              )}
             </div>
           ) : (
             <div className="w-full h-96 flex justify-center items-center text-violet-500">
