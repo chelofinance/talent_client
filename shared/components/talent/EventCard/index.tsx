@@ -4,9 +4,7 @@ import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import ConfirmationNumberOutlined from "@mui/icons-material/ConfirmationNumberOutlined";
 
 import Card from "@shared/components/common/Card";
-import Button from "@shared/components/common/Forms/Button";
 import AvatarElement from "@shared/components/common/AvatarElement";
-import {useRouter} from "next/router";
 
 interface EventCardProps {
   title?: string;

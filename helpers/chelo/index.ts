@@ -22,7 +22,7 @@ export const parseCheloTransaction = (
   return {
     to: tx.to,
     data: iface.encodeFunctionData(tx.signature.split("(")[0], tx.args),
-    value: "0",
+    value: tx.value || "0",
   };
 };
 

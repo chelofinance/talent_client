@@ -11,11 +11,13 @@ import Card from "@shared/components/common/Card";
 import { Button } from "@shared/components/common/Forms";
 import AvatarElement from "@shared/components/common/AvatarElement";
 import { useDaos, useProposals, useRole } from "@shared/hooks/daos";
-import { useAppDispatch } from "@redux/store";
+import { useAppDispatch, useAppSelector } from "@redux/store";
 import { onShowTransaction } from "@redux/actions";
 import { useWeb3React } from "@web3-react/core";
-import { hash, toBN } from "@helpers/index";
+import { getNetworkProvider, hash, toBN } from "@helpers/index";
 import { prettifyNumber } from "@helpers/erc";
+import { getNetworkConfig } from "@helpers/network";
+import { attach } from "@helpers/contracts";
 
 const Accordion = styled(MuiAccordion)(({ theme }) => ({
   backgroundColor: "#f1f2f4",
@@ -42,6 +44,7 @@ const Event = () => {
   const router = useRouter();
   const { daos } = useDaos();
   const { account, chainId } = useWeb3React();
+  const { networkId } = useAppSelector((state) => state.user.account);
   const { proposals } = useProposals(router.query.id as string);
   const { executor } = useRole();
 
@@ -81,6 +84,7 @@ const Event = () => {
   };
 
   const handleManualApprove = async () => {
+    const { addresses } = getNetworkConfig(networkId);
     const dao = daos[daos.length - 1] as MiniDAO;
     const { targets, values, calldatas } = proposal.calls.reduce(
       (acc, cur) => {
@@ -92,6 +96,12 @@ const Event = () => {
       },
       { targets: [], values: [], calldatas: [] }
     );
+    const feeController = attach(
+      "FeeController",
+      addresses.feeController,
+      getNetworkProvider(networkId)
+    );
+    const feeInEth = await feeController.getFee(hash("TALENT_EXECUTE"));
 
     dispatch(
       onShowTransaction({
@@ -100,6 +110,7 @@ const Event = () => {
             to: dao.id,
             signature: "managerExecute(address[],uint256[],bytes[],bytes32)",
             args: [targets, values, calldatas, hash(proposal.description)],
+            value: feeInEth.amount,
           },
         ],
         type: "wallet",

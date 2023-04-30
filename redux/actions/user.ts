@@ -49,7 +49,7 @@ export const onLoadWalletAssets = createAsyncThunk<
     erc721: ERC721[];
     account: string;
     wallet: ConnectionType;
-    roles: {name: string}[];
+    roles: {name: RoleNames}[];
   },
   undefined,
   {rejectValue: StateErrorType; state: RootState}

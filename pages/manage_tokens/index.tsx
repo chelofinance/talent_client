@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import SearchIcon from "@mui/icons-material/Search";
-import {useAppDispatch, useAppSelector} from "@redux/store";
+import {useAppDispatch} from "@redux/store";
 import {useDaos} from "@shared/hooks/daos";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
@@ -13,11 +13,12 @@ import {TextInput} from "@shared/components/common/Forms";
 import {Form, Formik} from "formik";
 import * as Yup from "yup";
 import {Fade} from "@mui/material";
+import {TokenRoleIds} from "@shared/constants";
 
 const tokenSelected = {
-  Alumni: {id: "1", name: "Alumni"},
-  Talent: {id: "2", name: "Talent"},
-  Sponsor: {id: "3", name: "Sponsor"},
+  Alumni: {id: TokenRoleIds.alumni, name: "Alumni"},
+  Talent: {id: TokenRoleIds.talent, name: "Talent"},
+  Sponsor: {id: TokenRoleIds.sponsor, name: "Sponsor"},
 };
 
 const ManageTokens = () => {
@@ -52,7 +53,7 @@ const ManageTokens = () => {
   };
 
   const renderList = () => {
-    const list = daos[0].members.filter((member) => member.role === selectedList.id);
+    const list = daos[0]?.members.filter((member) => member.role === selectedList.id) || [];
     const filteredList = filterMembers(list);
 
     return (
@@ -220,16 +221,19 @@ const ManageTokens = () => {
     <>
       <div className="flex flex-col items-center w-full pt-20 pb-4 h-full">
         <div className="w-full mb-20 flex justify-center gap-5">
-          {Object.values(tokenSelected).map((token) => (
-            <button
-              key={token.id}
-              onClick={() => setSelectedList(token)}
-              className={`bg-${selectedList.id === token.id ? "violet-500 text-white" : "violet-200"
-                } rounded-md px-4 py-2 hover:bg-violet-400`}
-            >
-              {token.name}
-            </button>
-          ))}
+          {Object.values(tokenSelected).map(
+            (token) =>
+              token.id !== TokenRoleIds.alumni && (
+                <button
+                  key={token.id}
+                  onClick={() => setSelectedList(token)}
+                  className={`bg-${selectedList.id === token.id ? "violet-500 text-white" : "violet-200"
+                    } rounded-md px-4 py-2 hover:bg-violet-400`}
+                >
+                  {token.name}
+                </button>
+              )
+          )}
         </div>
         <div className="relative w-96">
           <Fade in={!showForm} timeout={200}>

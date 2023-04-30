@@ -3,10 +3,7 @@ type NetworkConfig = {
   provider: string;
   providerWs: string;
   addresses: {
-    factory: string;
-    erc20: string;
-    erc721: string;
-    erc1155: string;
+    feeController: string;
   };
   endpoints: {
     chelo: string;
@@ -38,10 +35,7 @@ export const networkConfigs: Record<NetworkName, NetworkConfig> = {
     provider: "",
     providerWs: "",
     addresses: {
-      factory: "",
-      erc20: "",
-      erc721: "",
-      erc1155: "",
+      feeController: "",
     },
     endpoints: {
       chelo: null,
@@ -67,10 +61,7 @@ export const networkConfigs: Record<NetworkName, NetworkConfig> = {
     provider: `https://eth-goerli.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_GOERLI_PROVIDER}`,
     providerWs: `wss://eth-goerli.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_GOERLI_PROVIDER}`,
     addresses: {
-      factory: "0x302d6BB807B4753D8bBa4632AA8b1E2f61C664d0",
-      erc20: "0xBD2aad5E71272C12bA94a2651d6423eaA00dCE20",
-      erc721: "0x04878D874cEAC30167D746Fe17cf588A441cf115",
-      erc1155: "0x09B42f364851157353Cd21491BfC66B76163729e",
+      feeController: "",
     },
     endpoints: {
       chelo: "https://api.thegraph.com/subgraphs/name/rcontre360/talent_subgraph",
@@ -97,10 +88,7 @@ export const networkConfigs: Record<NetworkName, NetworkConfig> = {
     provider: `https://polygon-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_POLYGON_PROVIDER}`,
     providerWs: `wss://polygon-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_POLYGON_PROVIDER}`,
     addresses: {
-      factory: "0xC480A0779c93DBFAB4a348ca7900ff25305c65ca",
-      erc20: "0x174e2029C489b2c53d303200a6DFAAAA8EFa444A",
-      erc721: "0xF9167a7E203fEE806991A206b5871c703a1F0e78",
-      erc1155: "0x8aCa04Aa2e97f5C26604ce18b3772963fBbdF184",
+      feeController: "",
     },
     endpoints: {
       chelo: "https://api.thegraph.com/subgraphs/name/rcontre360/talent_subgraph_production",
@@ -125,10 +113,7 @@ export const networkConfigs: Record<NetworkName, NetworkConfig> = {
     provider: `https://polygon-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_MUMBAI_PROVIDER}`,
     providerWs: `wss://polygon-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_MUMBAI_PROVIDER}`,
     addresses: {
-      factory: "0x871Ae4D4da641c7b50800255E191082315D35a78",
-      erc20: "0xB193CF2d4B2DE06fd553aa7681B02E4Cc0A9a852",
-      erc721: "0xE93Fd38Ed63c798f7C34c4F8A28C0ECECEA527CE",
-      erc1155: "0x05dBD799B5A2479F9116012789Fe611805Ab93Fb",
+      feeController: "",
     },
     endpoints: {
       chelo: "https://api.thegraph.com/subgraphs/name/rcontre360/chelo_treasury_mumbai",
@@ -154,10 +139,7 @@ export const networkConfigs: Record<NetworkName, NetworkConfig> = {
     provider: "http://127.0.0.1:8545/",
     providerWs: "wss://127.0.0.1:8545/",
     addresses: {
-      factory: "0x871Ae4D4da641c7b50800255E191082315D35a78",
-      erc20: "0xB193CF2d4B2DE06fd553aa7681B02E4Cc0A9a852",
-      erc721: "0xE93Fd38Ed63c798f7C34c4F8A28C0ECECEA527CE",
-      erc1155: "0x05dBD799B5A2479F9116012789Fe611805Ab93Fb",
+      feeController: "0x4072BF63d76C0c7f699c6D9B04f313A0289D0fA3",
     },
     endpoints: {
       chelo: "http://localhost:8000/subgraphs/name/rcontre360/talent_subgraph",
