@@ -27,10 +27,10 @@ import {
   getLatestBlock,
   getNetworkProvider,
   isProduction,
-  toBN,
 } from "@helpers/index";
 import {useWeb3React} from "@web3-react/core";
-import {Contract, ethers} from "ethers";
+import {ethers} from "ethers";
+import {TokenRoleIds} from "@shared/constants";
 
 const Accordion = styled((props: AccordionProps) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -162,16 +162,6 @@ const AddParticipant = () => {
     return batchSize;
   };
 
-  const calculateMintAmount = async (token: Contract) => {
-    const totalSupply = await token.totalSupply();
-    const group = await token.groups(2);
-
-    return totalSupply
-      .div(100)
-      .mul(group.power)
-      .div(group.mints || dao.members.length);
-  };
-
   const onImportSubmit = async () => {
     setUploading(true);
     try {
@@ -230,28 +220,22 @@ const AddParticipant = () => {
         throw Error("Users wallet");
       }
 
-      const tokenContract = attach(
-        "ElasticVotes",
-        dao.token.address,
-        getNetworkProvider(networkId)
-      );
+      const tokenContract = attach("ERC1155", dao.token.address, getNetworkProvider(networkId));
       const cids = await uploadUsersData(questionedData);
-      const mintAmount = await calculateMintAmount(tokenContract);
+      const mintAmount = 1;
 
       const proposalsArray: ProposalInfo[] = cids.map((cid, i) => {
-        const addGroupCalldata = tokenContract.interface.encodeFunctionData("addToGroup", [
-          questionedData[i].metadata.wallet,
-          2,
-        ]);
         const mintCalldata = tokenContract.interface.encodeFunctionData("mint", [
           questionedData[i].metadata.wallet,
-          mintAmount,
+          TokenRoleIds.alumni,
+          1,
+          [],
         ]);
 
         return {
-          targets: [dao.token.address, dao.token.address],
-          values: [0, 0],
-          calldatas: [addGroupCalldata, mintCalldata],
+          targets: [dao.token.address],
+          values: [0],
+          calldatas: [mintCalldata],
           description: cid,
           roundId: eventId as string,
         };
@@ -320,19 +304,23 @@ const AddParticipant = () => {
 
     try {
       const cid = await dataCid(values);
-      const token = attach("ElasticVotes", dao.token.address, getNetworkProvider(networkId));
-      const mintAmount = await calculateMintAmount(token);
+      const token = attach("ERC1155", dao.token.address, getNetworkProvider(networkId));
+      const mintAmount = 1;
 
       const txs = [
         {
           to: dao.id,
           signature: "proposeWithRound(address[],uint256[],bytes[],string,uint256)",
           args: [
-            [token.address, token.address],
-            [0, 0],
+            [token.address],
+            [0],
             [
-              token.interface.encodeFunctionData("addToGroup", [values.wallet, 2]),
-              token.interface.encodeFunctionData("mint", [values.wallet, mintAmount]),
+              token.interface.encodeFunctionData("mint", [
+                values.wallet,
+                TokenRoleIds.alumni,
+                1,
+                [],
+              ]),
             ],
             cid,
             eventId,

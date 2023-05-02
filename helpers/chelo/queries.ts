@@ -17,6 +17,10 @@ export const GET_ALL_GIVEN_OWNER = /* GraphQL */ gql`
       description
       startBlock
       executeThreshold
+      roleVotes {
+        maxVotes
+        roleId
+      }
     }
     governors {
       id
@@ -26,15 +30,9 @@ export const GET_ALL_GIVEN_OWNER = /* GraphQL */ gql`
       quorum
       token {
         id
-        asERC20 {
-          name
-          symbol
-          decimals
+        asERC1155 {
           asAccount {
             id
-          }
-          totalSupply {
-            value
           }
           balances {
             account {
@@ -42,21 +40,10 @@ export const GET_ALL_GIVEN_OWNER = /* GraphQL */ gql`
             }
             value
             valueExact
-          }
-        }
-        asERC721 {
-          asAccount {
-            id
-          }
-          supportsMetadata
-          name
-          symbol
-          tokens {
-            owner {
-              id
+            token {
+              identifier
+              uri
             }
-            identifier
-            uri
           }
         }
       }

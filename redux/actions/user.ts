@@ -1,18 +1,25 @@
 import {createAsyncThunk, createAction} from "@reduxjs/toolkit";
 
 import * as actionTypes from "@redux/constants";
-import {getERC20Balances, getERC721Balances} from "@helpers/erc/utils";
-import {addNetwork, getProvider, switchNetwork} from "@helpers/index";
-import {ConnectionType, network} from "@helpers/connection";
+import {addNetwork, getNetworkProvider, getProvider, switchNetwork} from "@helpers/index";
+import {ConnectionType} from "@helpers/connection";
 import {Connector} from "@web3-react/types";
 import {getConnection} from "@helpers/connection/utils";
 import {TransactionMeta} from "types";
 import {getNetworkConfig} from "@helpers/network";
 import {RootState} from "@redux/store";
 import {attach} from "@helpers/contracts";
-import {BigNumber} from "ethers";
-import {onCreateProposal, onProposalExecuted, onRoundCreated, onVoteCast} from "./daos";
+import {BigNumber, ethers} from "ethers";
+import {
+  onCreateProposal,
+  onProposalExecuted,
+  onRoundCreated,
+  onTokenBurn,
+  onTokenMint,
+  onVoteCast,
+} from "./daos";
 import {Log} from "@ethersproject/providers";
+import {TokenRoles} from "@shared/constants";
 
 export const onConnectWallet = createAsyncThunk<
   {
@@ -37,18 +44,52 @@ export const onConnectWallet = createAsyncThunk<
 });
 
 export const onLoadWalletAssets = createAsyncThunk<
-  {erc20: ERC20[]; erc721: ERC721[]; account: string; wallet: ConnectionType},
-  {wallet: ConnectionType; account: string; networkId: SupportedNetworks},
-  {rejectValue: StateErrorType}
->(actionTypes.LOAD_ASSETS, async ({wallet, networkId, account}, {rejectWithValue}) => {
+  {
+    erc20: ERC20[];
+    erc721: ERC721[];
+    account: string;
+    wallet: ConnectionType;
+    roles: {name: RoleNames}[];
+  },
+  undefined,
+  {rejectValue: StateErrorType; state: RootState}
+>(actionTypes.LOAD_ASSETS, async (_args, {rejectWithValue, getState}) => {
   try {
-    const userTokens = await getERC20Balances(account, networkId);
-    const userNfts = await getERC721Balances(account, networkId);
+    const {
+      daos,
+      user: {
+        account: {networkId, address, wallet},
+      },
+    } = getState();
+    const dao = daos.daos[0] as MiniDAO;
+    const provider = getNetworkProvider(networkId);
+    const roles = [] as {name: RoleNames}[];
+    const token = attach("ERC1155", dao.token.address, provider);
+    const daoContract = attach("RoundVoting", dao.id, provider);
+    console.log("CURRENT ROLE", {address, tkn: dao.token.address, fn: token.currentRole});
+    const tokenRole = TokenRoles[(await token.currentRole(address)).toString()];
+
+    const [MANAGER_ROLE, EXECUTE_ROLE, ROUND_ROLE] = await Promise.all([
+      await token.MANAGER_ROLE(),
+      await daoContract.EXECUTE_ROLE(),
+      await daoContract.ROUND_ROLE(),
+    ]);
+    const [hasMintingRole, hasExecRole, hasRoundRole]: boolean[] = await Promise.all([
+      token.hasRole(MANAGER_ROLE, address),
+      daoContract.hasRole(EXECUTE_ROLE, address),
+      daoContract.hasRole(ROUND_ROLE, address),
+    ]);
+
+    if (tokenRole) roles.push({name: tokenRole});
+    if (hasMintingRole) roles.push({name: "minter"});
+    if (hasRoundRole) roles.push({name: "round"});
+    if (hasExecRole) roles.push({name: "executor"});
 
     return {
-      erc20: userTokens,
-      erc721: userNfts,
-      account,
+      erc20: [], //not necessary right now
+      erc721: [], //not necessary right now
+      roles,
+      account: address,
       wallet,
     };
   } catch (err) {
@@ -142,11 +183,12 @@ export const onSubscribeEvents = createAsyncThunk<boolean, void, {state: RootSta
   async (_, {getState, dispatch, rejectWithValue}) => {
     const state = getState();
     const chainId = state.user.account.networkId;
-    const coreAddress = state.daos.daos[0].id;
+    const dao = state.daos.daos[0] as MiniDAO;
     const {provider: rpc} = getNetworkConfig(chainId);
     const provider = getProvider(rpc);
 
-    const coreContract = attach("RoundVoting", coreAddress, provider);
+    const coreContract = attach("RoundVoting", dao.id, provider);
+    const token = attach("ERC1155", dao.token.address, provider);
 
     coreContract.on(
       "ProposalCreated",
@@ -190,7 +232,7 @@ export const onSubscribeEvents = createAsyncThunk<boolean, void, {state: RootSta
             startBlock,
             endBlock,
             description,
-            coreAddress,
+            coreAddress: dao.id,
           })
         );
       }
@@ -199,7 +241,7 @@ export const onSubscribeEvents = createAsyncThunk<boolean, void, {state: RootSta
     coreContract.on("VoteCast", (...args: [string, BigNumber, number, BigNumber, string, Log]) => {
       const [voter, proposalId, support, votes, reason, event] = args;
       console.log("VoteCast", args);
-      dispatch(onVoteCast({voter, proposalId, support, votes, reason, coreAddress}));
+      dispatch(onVoteCast({voter, proposalId, support, votes, reason, coreAddress: dao.id}));
     });
 
     coreContract.on("ProposalExecuted", (...args: [BigNumber, Log]) => {
@@ -208,7 +250,7 @@ export const onSubscribeEvents = createAsyncThunk<boolean, void, {state: RootSta
       dispatch(
         onProposalExecuted({
           proposalId,
-          coreAddress,
+          coreAddress: dao.id,
         })
       );
     });
@@ -219,10 +261,42 @@ export const onSubscribeEvents = createAsyncThunk<boolean, void, {state: RootSta
       dispatch(
         onRoundCreated({
           roundId,
-          coreAddress,
+          coreAddress: dao.id,
         })
       );
     });
+
+    token.on(
+      "TransferSingle",
+      (...args: [string, string, string, BigNumber, BigNumber, unknown, Log]) => {
+        const [_operator, from, to, idRole, amount, _data, log] = args;
+        console.log("TransferSingle", from, to, idRole, amount);
+
+        if (from === ethers.constants.AddressZero) {
+          //mint
+          dispatch(
+            onTokenMint({
+              from,
+              to,
+              id: idRole,
+              amount: amount,
+              coreAddress: dao.id,
+            })
+          );
+        } else {
+          // burn
+          dispatch(
+            onTokenBurn({
+              from,
+              to,
+              id: idRole,
+              amount: amount,
+              coreAddress: dao.id,
+            })
+          );
+        }
+      }
+    );
 
     return true;
   }

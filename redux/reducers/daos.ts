@@ -71,5 +71,24 @@ export const daoReducer = createReducer(dao_state, (builder) => {
                     proposal.executed = true;
                 }
             }
+        })
+        .addCase(actions.onTokenMint.fulfilled, (state, action) => {
+            const {coreAddress, account, role, stake} = action.payload;
+            const dao = state.daos.find(
+                (dao: MiniDAO) => dao.id.toLowerCase() === coreAddress.toLowerCase()
+            ) as MiniDAO;
+
+            dao.members.push({account, role, stake});
+        })
+        .addCase(actions.onTokenBurn.fulfilled, (state, action) => {
+            const {coreAddress, account} = action.payload;
+            const dao = state.daos.find(
+                (dao: MiniDAO) => dao.id.toLowerCase() === coreAddress.toLowerCase()
+            ) as MiniDAO;
+            const index = dao.members.findIndex(
+                (cur) => cur.account.toLowerCase() === account.toLowerCase()
+            );
+
+            if (index >= 0) dao.members.splice(index, 1);
         });
 });

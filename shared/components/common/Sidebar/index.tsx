@@ -1,13 +1,16 @@
 import * as React from "react";
-import {HomeOutlined} from "@mui/icons-material";
-import {DashboardOutlined} from "@mui/icons-material";
-import {CalendarMonthOutlined} from "@mui/icons-material";
+import HomeOutlined from "@mui/icons-material/HomeOutlined";
+import DashboardOutlined from "@mui/icons-material/DashboardOutlined";
+import CalendarMonthOutlined from "@mui/icons-material/CalendarMonthOutlined";
+import TollIcon from "@mui/icons-material/Toll";
 
 import {useAppSelector} from "@redux/store";
 import LayoutDropdown, {DropdownElement} from "../LayoutDropdown";
+import {useRole} from "@shared/hooks/daos";
 
 const Sidebar = () => {
   const {daos} = useAppSelector((state) => state);
+  const {round, minter} = useRole();
   const loaded = daos.daos.length <= 0;
 
   const LENDING_ITEMS: DropdownElement[] = [
@@ -18,12 +21,26 @@ const Sidebar = () => {
       off: loaded,
       icon: <DashboardOutlined width={30} />,
     },
-    {
-      label: "Create Event",
-      url: "/create_event",
-      off: loaded,
-      icon: <CalendarMonthOutlined width={30} />,
-    },
+    ...(round
+      ? [
+        {
+          label: "Create Event",
+          url: "/create_event",
+          off: loaded,
+          icon: <CalendarMonthOutlined width={30} />,
+        },
+      ]
+      : []),
+    ...(minter
+      ? [
+        {
+          label: "Manage tokens",
+          url: "/manage_tokens",
+          off: loaded,
+          icon: <TollIcon width={30} />,
+        },
+      ]
+      : []),
   ];
 
   return (

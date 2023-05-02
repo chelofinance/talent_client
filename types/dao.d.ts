@@ -7,6 +7,7 @@ type VoteSettings = Partial<Setting & {maxPrincipal: string; minPrincipal: strin
 type DaoType = "snapshot" | "aragon" | "syndicate" | "chelo";
 type MiniDaoType = "membership" | "reputation" | "company";
 type TransactionStatus = "waiting" | "confirmed" | "sent" | "executed";
+type RoleNames = "alumni" | "talent" | "sponsor" | "minter" | "executor" | "round";
 
 type ScriptType =
   | "loan"
@@ -60,7 +61,7 @@ interface DAO {
   wallet: string;
   type: DaoType;
   mini_daos?: MiniDAO[];
-  members?: {account: string; stake: string}[];
+  members?: {account: string; stake: string; role: string}[];
   isRoot: boolean;
   erc20?: {
     address: string;
@@ -97,6 +98,7 @@ type ProposalRound = {
   description: string;
   finished: boolean;
   executeThreshold: number;
+  roles: {maxVotes: number; id: string}[];
   metadata?: {
     title: string;
     description: string;

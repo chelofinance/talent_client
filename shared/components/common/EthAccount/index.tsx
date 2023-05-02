@@ -17,6 +17,7 @@ import {getNetworkConfig} from "@helpers/network";
 import {useWeb3React} from "@web3-react/core";
 import {networkConfigs} from "@helpers/network";
 import {formatAddress} from "@helpers/index";
+import {useRole} from "@shared/hooks/daos";
 
 export interface EthIdenticonProps {
   className?: string;
@@ -36,6 +37,7 @@ export const EthAccount: React.FunctionComponent<EthIdenticonProps> = (props) =>
   const {className} = props;
   const [changeWallet, setChangeWallet] = React.useState(false);
   const {networkId, wallet, address} = useAppSelector((state) => state.user.account);
+  const {talent, alumni, sponsor} = useRole();
   const {connector} = useWeb3React();
   const dispatch = useAppDispatch();
 
@@ -57,6 +59,13 @@ export const EthAccount: React.FunctionComponent<EthIdenticonProps> = (props) =>
   const handleChangeWallet = () => {
     setChangeWallet(true);
   };
+
+  const getRoleInfo = () => {
+    if (talent) return {name: "Talent core", color: "blue-100"};
+    if (alumni) return {name: "Alumni", color: "lime-100"};
+    if (sponsor) return {name: "Sponsor", color: "red-100"};
+  };
+  const roleInfo = getRoleInfo();
 
   return (
     <div className={clsx("flex gap-3 text-black", className)}>
@@ -177,6 +186,14 @@ export const EthAccount: React.FunctionComponent<EthIdenticonProps> = (props) =>
         setShowModal={(value) => setChangeWallet(value === "show")}
         showModal={changeWallet}
       />
+      {roleInfo && (
+        <div
+          className={`py-1 px-3 rounded-lg flex items-center justify-center bg-${roleInfo.color}`}
+        >
+          <span className="font-semibold">{roleInfo.name}</span>
+          <span className="bg-blue-100 bg-lime-100 bg-red-100"></span>
+        </div>
+      )}
     </div>
   );
 };

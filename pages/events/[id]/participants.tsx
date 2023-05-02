@@ -1,24 +1,25 @@
 import React from "react";
-import {useRouter} from "next/router";
+import { useRouter } from "next/router";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MuiAccordion from "@mui/material/Accordion";
 import MuiAccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
-import {styled} from "@mui/system";
+import { styled } from "@mui/system";
 
 import Card from "@shared/components/common/Card";
-import {Button} from "@shared/components/common/Forms";
+import { Button } from "@shared/components/common/Forms";
 import AvatarElement from "@shared/components/common/AvatarElement";
-import {useDaos, useProposals} from "@shared/hooks/daos";
-import {useAppDispatch} from "@redux/store";
-import {onShowTransaction} from "@redux/actions";
-import {useWeb3React} from "@web3-react/core";
-import {attach} from "@helpers/contracts";
-import {getNetworkProvider, getProvider, toBN} from "@helpers/index";
-import {prettifyNumber} from "@helpers/erc";
+import { useDaos, useProposals, useRole } from "@shared/hooks/daos";
+import { useAppDispatch, useAppSelector } from "@redux/store";
+import { onShowTransaction } from "@redux/actions";
+import { useWeb3React } from "@web3-react/core";
+import { getNetworkProvider, hash, toBN } from "@helpers/index";
+import { prettifyNumber } from "@helpers/erc";
+import { getNetworkConfig } from "@helpers/network";
+import { attach } from "@helpers/contracts";
 
-const Accordion = styled(MuiAccordion)(({theme}) => ({
+const Accordion = styled(MuiAccordion)(({ theme }) => ({
   backgroundColor: "#f1f2f4",
   borderRadius: theme.shape.borderRadius,
   boxShadow: "none",
@@ -41,13 +42,15 @@ const AccordionSummary = styled(MuiAccordionSummary)(() => ({
 
 const Event = () => {
   const router = useRouter();
-  const {daos} = useDaos();
-  const {account, chainId} = useWeb3React();
-  const {proposals} = useProposals(router.query.id as string);
+  const { daos } = useDaos();
+  const { account, chainId } = useWeb3React();
+  const { networkId } = useAppSelector((state) => state.user.account);
+  const { proposals } = useProposals(router.query.id as string);
+  const { executor } = useRole();
 
   const dispatch = useAppDispatch();
   const proposal = proposals.find(
-    ({metadata}) => metadata.metadata.wallet === router.query.userId
+    ({ metadata }) => metadata.metadata.wallet === router.query.userId
   );
   const hasVoted = proposal?.votes?.some(
     (vote: ProposalVote) => vote.voter.toLowerCase() === account.toLowerCase()
@@ -74,6 +77,42 @@ const Event = () => {
     dispatch(
       onShowTransaction({
         txs: [castVoteTx],
+        type: "wallet",
+        dao: dao.id,
+      })
+    );
+  };
+
+  const handleManualApprove = async () => {
+    const { addresses } = getNetworkConfig(networkId);
+    const dao = daos[daos.length - 1] as MiniDAO;
+    const { targets, values, calldatas } = proposal.calls.reduce(
+      (acc, cur) => {
+        return {
+          targets: [...acc.targets, cur.target],
+          values: [...acc.values, cur.value],
+          calldatas: [...acc.calldatas, cur.calldata],
+        };
+      },
+      { targets: [], values: [], calldatas: [] }
+    );
+    const feeController = attach(
+      "FeeController",
+      addresses.feeController,
+      getNetworkProvider(networkId)
+    );
+    const feeInEth = await feeController.getFee(hash("TALENT_EXECUTE"));
+
+    dispatch(
+      onShowTransaction({
+        txs: [
+          {
+            to: dao.id,
+            signature: "managerExecute(address[],uint256[],bytes[],bytes32)",
+            args: [targets, values, calldatas, hash(proposal.description)],
+            value: feeInEth.amount.toString(),
+          },
+        ],
         type: "wallet",
         dao: dao.id,
       })
@@ -108,16 +147,29 @@ const Event = () => {
                   </div>
                 }
               />
-              <Button
-                className={`px-10 py-1 h-10 bg-${hasVoted ? "gray-300" : "violet-500"
-                  } text-white font-bold rounded-full`}
-                disabled={hasVoted}
-                onClick={handleVoteYes}
-              >
-                {hasVoted ? "Already voted" : "Vote"}
-              </Button>
+              <div className="flex flex-col gap-2">
+                <Button
+                  className={`px-5 py-1 h-8 bg-${
+                    hasVoted ? "gray-300" : "violet-500"
+                  } text-white font-bold rounded-md`}
+                  disabled={hasVoted}
+                  onClick={handleVoteYes}
+                >
+                  {hasVoted ? "Already voted" : "Vote"}
+                </Button>
+                {executor && (
+                  <Button
+                    className={`px-5 py-1 h-8 bg-${
+                      proposal.executed ? "gray-300" : "violet-500"
+                    } text-white font-bold rounded-md`}
+                    onClick={handleManualApprove}
+                  >
+                    {proposal.executed ? "Already executed" : "Manual approve"}
+                  </Button>
+                )}
+              </div>
             </div>
-            <div className="mb-10 mt-8 overflow-scroll" style={{maxHeight: "500px"}}>
+            <div className="mb-10 mt-8 overflow-scroll" style={{ maxHeight: "500px" }}>
               {proposal?.metadata?.metadata.questions.map((q, index) => (
                 <Accordion key={index}>
                   <AccordionSummary
@@ -142,8 +194,8 @@ const Event = () => {
 
 const NewcomersList: React.FunctionComponent<{}> = (props) => {
   const router = useRouter();
-  const {proposals} = useProposals(router.query.id as string);
-  const {daos} = useDaos();
+  const { proposals } = useProposals(router.query.id as string);
+  const { daos } = useDaos();
   const decimals = daos.length > 0 ? daos[0].token.decimals : 6;
 
   const handleClick = (userId: string) => () => {
@@ -163,8 +215,8 @@ const NewcomersList: React.FunctionComponent<{}> = (props) => {
       <div className="p-4 border-b border-gray-200 flex justify-center">
         <span className="text-violet-500 font-semibold">Candidates</span>
       </div>
-      <div className="overflow-scroll" style={{maxHeight: "600px"}}>
-        {proposals.map(({metadata, votesYes}, i) => (
+      <div className="overflow-scroll" style={{ maxHeight: "600px" }}>
+        {proposals.map(({ metadata, votesYes }, i) => (
           <div
             className={"mt-8 hover:bg-gray-100 px-8"}
             onClick={handleClick(metadata.metadata.wallet)}

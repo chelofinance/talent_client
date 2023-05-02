@@ -1,9 +1,11 @@
 import React from "react";
-import {useRouter} from "next/router";
-import {useDaos, useProposals} from "@shared/hooks/daos";
-import {useAppDispatch} from "@redux/store";
-import {onShowTransaction} from "@redux/actions";
-import {hash} from "@helpers/index";
+import { useRouter } from "next/router";
+import { useDaos, useProposals } from "@shared/hooks/daos";
+import { useAppDispatch, useAppSelector } from "@redux/store";
+import { onShowTransaction } from "@redux/actions";
+import { getNetworkProvider, hash } from "@helpers/index";
+import { attach } from "@helpers/contracts";
+import { getNetworkConfig } from "@helpers/network";
 
 const StackIcon = () => (
   <svg
@@ -24,15 +26,17 @@ const StackIcon = () => (
 
 const CreateEvent = () => {
   const router = useRouter();
-  const {daos, loaded} = useDaos();
-  const {proposals} = useProposals(router.query.id as string);
+  const { account } = useAppSelector(({ user }) => user);
+  const { daos, loaded } = useDaos();
+  const { proposals } = useProposals(router.query.id as string);
   const dispatch = useAppDispatch();
 
   const proposal = proposals.find((prop) => prop.metadata.metadata.wallet === router.query.userId);
 
   const handleNormalSubmit = async () => {
+    const { addresses } = getNetworkConfig(account.networkId);
     const dao = daos[daos.length - 1] as MiniDAO;
-    const {targets, values, calldatas} = proposal.calls.reduce(
+    const { targets, values, calldatas } = proposal.calls.reduce(
       (acc, cur) => {
         return {
           targets: [...acc.targets, cur.target],
@@ -40,9 +44,15 @@ const CreateEvent = () => {
           calldatas: [...acc.calldatas, cur.calldata],
         };
       },
-      {targets: [], values: [], calldatas: []}
+      { targets: [], values: [], calldatas: [] }
     );
-    // Add your logic here
+    const feeController = attach(
+      "FeeController",
+      addresses.feeController,
+      getNetworkProvider(account.networkId)
+    );
+    const feeInEth = await feeController.getFee(hash("TALENT_EXECUTE"));
+
     dispatch(
       onShowTransaction({
         txs: [
@@ -50,6 +60,7 @@ const CreateEvent = () => {
             to: dao.id,
             signature: "execute(address[],uint256[],bytes[],bytes32)",
             args: [targets, values, calldatas, hash(proposal.description)],
+            value: feeInEth.amount,
           },
         ],
         type: "wallet",

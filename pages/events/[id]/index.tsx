@@ -5,7 +5,7 @@ import Link from "next/link";
 import Button from "@shared/components/common/Forms/Button";
 import Card from "@shared/components/common/Card";
 import AvatarElement from "@shared/components/common/AvatarElement";
-import {useDaos, useProposals} from "@shared/hooks/daos";
+import {useDaos, useProposals, useRole} from "@shared/hooks/daos";
 import {prettifyNumber} from "@helpers/erc";
 import {toBN} from "@helpers/index";
 import EventCard from "@shared/components/talent/EventCard";
@@ -13,6 +13,7 @@ import EventCard from "@shared/components/talent/EventCard";
 const Event = () => {
   const {daos, loaded} = useDaos();
   const router = useRouter();
+  const {executor} = useRole();
   const {proposals, round} = useProposals(router.query.id as string);
   const winners = [...proposals]
     .sort((a, b) => Number(b.votesYes) - Number(a.votesYes))
@@ -20,7 +21,7 @@ const Event = () => {
 
   const event = daos[0]?.rounds.find((round) => round.id === router.query.id);
   const isFinished = event?.finished;
-  const showList = !isFinished && proposals.length > 0;
+  const showList = (!isFinished && proposals.length > 0) || executor;
 
   const handleAddList = () => {
     router.push(`/events/${router.query.id}/add_participant`);
@@ -98,7 +99,7 @@ const NewcomersList: React.FunctionComponent<{proposals: MiniDaoProposal[]}> = (
     >
       <div className="overflow-y-scroll max-h-[30.7rem] px-12 ">
         {proposals.length === 0 ? (
-          <p className="text-gray-500">There are no participants</p>
+          <p className="text-gray-500 mt-3">There are no participants</p>
         ) : (
           sortedProposals.map(({metadata, votesYes}, i) => (
             <div

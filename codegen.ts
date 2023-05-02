@@ -1,7 +1,8 @@
 import {CodegenConfig} from "@graphql-codegen/cli";
 
 const config: CodegenConfig = {
-  schema: "https://api.thegraph.com/subgraphs/name/rcontre360/talent_subgraph_production",
+  schema: "https://api.thegraph.com/subgraphs/name/rcontre360/talent_subgraph",
+  //schema: "http://localhost:8000/subgraphs/name/rcontre360/talent_subgraph",
   //schema: [
   //{
   //'lib/schema.ts': {

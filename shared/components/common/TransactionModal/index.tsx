@@ -161,21 +161,18 @@ export const TransactionModal: React.FunctionComponent<TransactionModalProps> = 
           <div className="w-full">
             {(isSettingChange ? [txsInfo[0]] : txsInfo).map((tx, i) => (
               <div className={`flex w-full p-2  ${i !== 0 && "border-t border-gray-500"}`}>
-                <tx.component width={20} className="mr-3" />
                 <div className="flex w-full justify-between">
                   <p>{tx.message}</p>
-                  <p>{StatusMessages[tx.status] || "Waiting"}</p>
+                  <div className="flex">
+                    <tx.component width={20} className="mr-3 text-violet-500" />
+                    <p className="font-semibold">{StatusMessages[tx.status] || "Waiting"}</p>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
           {hideSend && (
-            <Button
-              className={`bg-purple-400 text-white ${loading ? "px-6 py-2" : "p-2"
-                } rounded w-32 w-1/2`}
-              onClick={onSubmitTx}
-              loading={loading}
-            >
+            <Button onClick={onSubmitTx} loading={loading}>
               Sign transaction
             </Button>
           )}

@@ -22,7 +22,7 @@ export const parseCheloTransaction = (
   return {
     to: tx.to,
     data: iface.encodeFunctionData(tx.signature.split("(")[0], tx.args),
-    value: "0",
+    value: tx.value || "0",
   };
 };
 
@@ -61,7 +61,6 @@ export const getUserCheloDAOs = async (args: {
   ).reduce((acc, cur) => cur.concat(acc), []);
 
   return res.governors.map((governor) => {
-    const isERC20 = Boolean(governor.token.asERC20);
     const proposals = governor.proposals.map((proposal) => {
       const {yes, no} = proposal.votecast.reduce(
         (acc, cur) => ({
@@ -100,26 +99,26 @@ export const getUserCheloDAOs = async (args: {
         })),
       };
     });
+
     const res: MiniDAO = {
       id: governor.id,
       name: governor.name,
       wallet: governor.id,
       type: "chelo",
       mini_daos: [], //TODO
-      members: isERC20
-        ? governor.token.asERC20.balances.map((bal) => ({
-          account: bal.account?.id,
-          stake: bal.valueExact,
+      members: governor.token.asERC1155.balances
+        .map((bal) => ({
+          account: bal.account?.id as string,
+          stake: bal.valueExact as string,
+          role: bal.token.identifier,
         }))
-        : governor.token.asERC721.tokens.map((tkn) => ({account: tkn.owner, stake: 1})),
+        .filter((bal) => bal.account && toBN(bal.stake).gt(0)),
       isRoot: false, //TODO
       erc20: [],
       erc721: [],
       token: {
-        address: isERC20
-          ? governor.token.asERC20.asAccount.id
-          : governor.token.asERC721.asAccount.id,
-        decimals: governor.token.asERC20.decimals,
+        address: governor.token.asERC1155.asAccount.id,
+        decimals: 0,
       },
       votesLength: governor.proposals.length.toString(),
       votingDelay: governor.votingDelay as string,
@@ -158,16 +157,32 @@ export function getProposalId(
   );
 }
 
-export const getRoundInfo = async (round: ProposalRound): Promise<ProposalRound> => {
+export const getRoundInfo = async (
+  round: GovernorsQuery["proposalRounds"][0]
+): Promise<ProposalRound> => {
   const metadata = await getIpfsRound(round.description);
   const imageUrl = ipfsToHttp(metadata.image);
+  let finalImage = "";
   try {
-    const validImage = await checkImage(imageUrl);
-    return {...round, metadata: {...metadata, image: validImage}};
+    finalImage = await checkImage(imageUrl);
   } catch {
-    const defaultImage = "/multimedia/chelo/logo_black.png";
-    return {...round, metadata: {...metadata, image: defaultImage}};
+    finalImage = "/multimedia/chelo/logo_black.png";
   }
+
+  return {
+    id: round.id,
+    startBlock: round.startBlock.toString(),
+    endBlock: round.endBlock.toString(),
+    description: round.description,
+    finished: false,
+    executeThreshold: round.executeThreshold,
+    proposals: [],
+    roles: round.roleVotes.map(({maxVotes, roleId}) => ({
+      maxVotes: Number(maxVotes),
+      id: roleId.toString(),
+    })),
+    metadata: {...metadata, image: finalImage},
+  };
 };
 
 export function ipfsToHttp(cid: string, gateway = "https://ipfs.io/ipfs/"): string {
