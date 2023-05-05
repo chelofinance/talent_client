@@ -66,7 +66,6 @@ export const onLoadWalletAssets = createAsyncThunk<
     const roles = [] as {name: RoleNames}[];
     const token = attach("ERC1155", dao.token.address, provider);
     const daoContract = attach("RoundVoting", dao.id, provider);
-    console.log("CURRENT ROLE", {address, tkn: dao.token.address, fn: token.currentRole});
     const tokenRole = TokenRoles[(await token.currentRole(address)).toString()];
 
     const [MANAGER_ROLE, EXECUTE_ROLE, ROUND_ROLE] = await Promise.all([

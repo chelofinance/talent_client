@@ -26,8 +26,12 @@ export const parseCheloTransaction = (
   };
 };
 
-const checkImage = (url: string): Promise<string> => {
+const checkImage = (url: string, timeoutDuration: number = 2000): Promise<string> => {
   return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      reject(new Error("Timeout: Image took too long to load"));
+    }, timeoutDuration); //2 seconds
+
     const img = new Image();
     img.src = url;
     img.onload = () => resolve(url);
@@ -164,7 +168,7 @@ export const getRoundInfo = async (
   const imageUrl = ipfsToHttp(metadata.image);
   let finalImage = "";
   try {
-    finalImage = await checkImage(imageUrl);
+    finalImage = await checkImage(imageUrl, 4000);
   } catch {
     finalImage = "/multimedia/chelo/logo_black.png";
   }
@@ -185,8 +189,10 @@ export const getRoundInfo = async (
   };
 };
 
-export function ipfsToHttp(cid: string, gateway = "https://ipfs.io/ipfs/"): string {
-  return `${gateway}${cid}`;
+export function ipfsToHttp(cid: string, gateway = "https://"): string {
+  const splitCid = cid.split("/");
+  const web3StorageCid = [gateway, splitCid[0], ".ipfs.w3s.link", `/${splitCid[1]}`].join("");
+  return web3StorageCid;
 }
 
 export async function getIpfsRound(cid: string): Promise<ProposalRound["metadata"]> {
